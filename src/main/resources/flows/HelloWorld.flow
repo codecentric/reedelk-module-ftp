@@ -20,16 +20,22 @@
       }
     },
     {
-      "implementor": "com.reedelk.core.component.LoggerComponent",
-      "description": "Log message attributes",
-      "level": "INFO",
-      "message": "#[message.attributes()]"
+      "implementor": "com.reedelk.core.component.PayloadSet",
+      "description": "Payload Set",
+      "mimeType": "*/*",
+      "payload": "#[{ one: 'one123', two: 'two234' }]"
     },
     {
       "implementor": "com.reedelk.core.component.ScriptEvaluator",
-      "description": "Concatenate 'Hello World' with 'name' path parameter",
+      "description": "Script",
       "mimeType": "text/plain",
-      "script": "helloWorld.js"
+      "script": "test.js"
+    },
+    {
+      "implementor": "com.reedelk.core.component.LoggerComponent",
+      "description": "Logger",
+      "level": "DEBUG",
+      "message": "#['yep']"
     }
   ]
 }
