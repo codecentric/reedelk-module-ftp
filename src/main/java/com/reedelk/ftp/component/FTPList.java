@@ -10,7 +10,6 @@ import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
 import org.apache.commons.net.ftp.FTPFile;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ModuleComponent("FTP List Files")
-public class ListFiles implements ProcessorSync {
+public class FTPList implements ProcessorSync {
 
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
@@ -29,23 +28,24 @@ public class ListFiles implements ProcessorSync {
 
     @Override
     public void initialize() {
-        requireNotNull(ListFiles.class, configuration, "Configuration");
+        requireNotNull(FTPList.class, configuration, "Configuration");
         provider = new FTPClientProvider(configuration);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
         String workingDir = configuration.getWorkingDir();
 
         FTPFile[] files = isNotBlank(workingDir) ?
-                provider.list(workingDir) : provider.list();
+                provider.list(workingDir) :
+                provider.list();
 
-        List<Map<String, Serializable>> allFiles =
-                stream(files).map(new FTPFileMapper()).collect(toList());
+        List allFiles = stream(files).map(new FTPFileMapper()).collect(toList());
 
-        return MessageBuilder.get(ListFiles.class)
-                .withJavaObject(allFiles)
+        return MessageBuilder.get(FTPList.class)
+                .withList(allFiles, Map.class)
                 .build();
     }
 

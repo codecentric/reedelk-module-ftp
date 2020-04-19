@@ -17,8 +17,8 @@ import java.io.IOException;
 
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
 
-@ModuleComponent("FTP Download File")
-public class DownloadFile implements ProcessorSync {
+@ModuleComponent("FTP Retrieve")
+public class FTPRetrieve implements ProcessorSync {
 
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
@@ -28,11 +28,11 @@ public class DownloadFile implements ProcessorSync {
     private FTPClientProvider provider;
 
     @Reference
-    private ScriptEngineService scriptEngine;
+    ScriptEngineService scriptEngine;
 
     @Override
     public void initialize() {
-        requireNotNull(ListFiles.class, configuration, "Configuration");
+        requireNotNull(FTPList.class, configuration, "Configuration");
         provider = new FTPClientProvider(configuration);
     }
 
@@ -50,7 +50,7 @@ public class DownloadFile implements ProcessorSync {
             }
 
             byte[] data = outputStream.toByteArray();
-            return MessageBuilder.get(DownloadFile.class)
+            return MessageBuilder.get(FTPRetrieve.class)
                     .withBinary(data)
                     .build();
 

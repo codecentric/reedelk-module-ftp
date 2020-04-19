@@ -22,8 +22,8 @@ import java.io.IOException;
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
-@ModuleComponent("FTP Upload File")
-public class UploadFile implements ProcessorSync {
+@ModuleComponent("FTP Store")
+public class FTPUpload implements ProcessorSync {
 
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
@@ -43,7 +43,7 @@ public class UploadFile implements ProcessorSync {
 
     @Override
     public void initialize() {
-        requireNotNull(ListFiles.class, configuration, "Configuration");
+        requireNotNull(FTPList.class, configuration, "Configuration");
         provider = new FTPClientProvider(configuration);
     }
 
@@ -61,7 +61,7 @@ public class UploadFile implements ProcessorSync {
 
         } else {
             byte[] evaluatedUploadData = scriptEngine.evaluate(uploadData, flowContext, message)
-                    .orElseThrow(() -> new FTPUploadException("Upload data was null"));
+                    .orElseThrow(() -> new FTPUploadException("Upload data was null")); // Should this one write an empty file?
             return upload(uploadFileName, evaluatedUploadData);
         }
     }
@@ -70,21 +70,23 @@ public class UploadFile implements ProcessorSync {
         this.configuration = configuration;
     }
 
-    public void setFileName(DynamicString fileName) {
-        this.fileName = fileName;
-    }
-
     public void setUploadData(DynamicByteArray uploadData) {
         this.uploadData = uploadData;
     }
 
+    public void setFileName(DynamicString fileName) {
+        this.fileName = fileName;
+    }
+
     private Message upload(String uploadFileName, byte[] data) {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
+
             boolean success = provider.upload(uploadFileName, inputStream);
             if (!success) {
                 throw new FTPDownloadException("Error could not be uploaded");
             }
-            return MessageBuilder.get(DownloadFile.class)
+
+            return MessageBuilder.get(FTPRetrieve.class)
                     .withBinary(data)
                     .build();
         } catch (IOException e) {
