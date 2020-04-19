@@ -24,6 +24,15 @@ public class FTPList implements ProcessorSync {
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
 
+    @Property("Recursive")
+    private Boolean recursive;
+
+    @Property("Files only")
+    private Boolean filesOnly;
+
+    @Property("Directories only")
+    private Boolean directoriesOnly;
+
     private FTPClientProvider provider;
 
     @Override
@@ -51,5 +60,17 @@ public class FTPList implements ProcessorSync {
 
     public void setConfiguration(ConnectionConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public void setDirectoriesOnly(Boolean directoriesOnly) {
+        this.directoriesOnly = directoriesOnly;
+    }
+
+    public void setFilesOnly(Boolean filesOnly) {
+        this.filesOnly = filesOnly;
+    }
+
+    public void setRecursive(Boolean recursive) {
+        this.recursive = recursive;
     }
 }

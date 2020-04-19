@@ -34,16 +34,16 @@ public class FTPUpload implements ProcessorSync {
     @Property("Upload data")
     private DynamicByteArray uploadData;
 
-    private FTPClientProvider provider;
+    @Reference
+    ScriptEngineService scriptEngine;
+    @Reference
+    ConverterService converterService;
 
-    @Reference
-    private ScriptEngineService scriptEngine;
-    @Reference
-    private ConverterService converterService;
+    private FTPClientProvider provider;
 
     @Override
     public void initialize() {
-        requireNotNull(FTPList.class, configuration, "Configuration");
+        requireNotNull(FTPUpload.class, configuration, "Configuration");
         provider = new FTPClientProvider(configuration);
     }
 
@@ -87,10 +87,10 @@ public class FTPUpload implements ProcessorSync {
             }
 
             return MessageBuilder.get(FTPRetrieve.class)
-                    .withBinary(data)
+                    .withJavaObject(true)
                     .build();
-        } catch (IOException e) {
-            throw new PlatformException(e);
+        } catch (IOException exception) {
+            throw new PlatformException(exception);
         }
     }
 }

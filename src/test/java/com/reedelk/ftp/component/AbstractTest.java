@@ -51,7 +51,7 @@ abstract class AbstractTest {
     @BeforeEach
     void setUp() {
         configure(fileSystem);
-        doAnswer(invocation -> {
+        lenient().doAnswer(invocation -> {
             DynamicValue<?> dynamicValue = invocation.getArgument(0);
             return Optional.ofNullable(dynamicValue.value());
         }).when(scriptEngine).evaluate(any(DynamicValue.class), eq(context), any(Message.class));
@@ -69,10 +69,14 @@ abstract class AbstractTest {
         }
     }
 
-    protected abstract void configure(FileSystem fileSystem);
-    protected abstract void clean(FileSystem fileSystem);
+    protected void configure(FileSystem fileSystem) {}
+    protected void clean(FileSystem fileSystem) {}
 
     protected int getPort() {
         return fakeFtpServer.getServerControlPort();
+    }
+
+    protected FileSystem getFileSystem() {
+        return fileSystem;
     }
 }
