@@ -1,5 +1,6 @@
 package com.reedelk.ftp.component;
 
+import com.reedelk.ftp.internal.CommandStore;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDownloadException;
 import com.reedelk.ftp.internal.exception.FTPUploadException;
@@ -23,7 +24,7 @@ import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.require
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
-public class FTPUpload implements ProcessorSync {
+public class FTPStore implements ProcessorSync {
 
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
@@ -43,7 +44,7 @@ public class FTPUpload implements ProcessorSync {
 
     @Override
     public void initialize() {
-        requireNotNull(FTPUpload.class, configuration, "Configuration");
+        requireNotNull(FTPStore.class, configuration, "Configuration");
         provider = new FTPClientProvider(configuration);
     }
 
@@ -81,7 +82,8 @@ public class FTPUpload implements ProcessorSync {
     private Message upload(String uploadFileName, byte[] data) {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
 
-            boolean success = provider.upload(uploadFileName, inputStream);
+            CommandStore command = new CommandStore(uploadFileName, inputStream);
+            boolean success = provider.execute(command);
             if (!success) {
                 throw new FTPDownloadException("Error could not be uploaded");
             }

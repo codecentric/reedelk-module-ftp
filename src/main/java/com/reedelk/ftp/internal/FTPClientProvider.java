@@ -1,15 +1,11 @@
 package com.reedelk.ftp.internal;
 
 import com.reedelk.ftp.component.ConnectionConfiguration;
-import com.reedelk.runtime.api.commons.ConfigurationPreconditions;
 import com.reedelk.runtime.api.exception.PlatformException;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class FTPClientProvider {
 
@@ -29,48 +25,11 @@ public class FTPClientProvider {
         ftp = new FTPClient(); // Maybe init only once?
     }
 
-    // List with path
-    public FTPFile[] list(String path) {
+    public <T> T execute(Command<T> command) {
         try {
             open();
-            return ftp.listFiles(path);
-        } catch (IOException exception) {
-            throw new PlatformException(exception);
-        } finally {
-            close();
-        }
-    }
-
-    // List
-    public FTPFile[] list() {
-        try {
-            open();
-            return ftp.listFiles();
-        } catch (IOException exception) {
-            throw new PlatformException(exception);
-        } finally {
-            close();
-        }
-    }
-
-    // Upload
-    public boolean upload(String remoteFileName, InputStream inputStream) {
-        try {
-            open();
-            return ftp.storeFile(remoteFileName, inputStream);
-        } catch (IOException exception) {
-            throw new PlatformException(exception);
-        } finally {
-            close();
-        }
-    }
-
-    // Download
-    public boolean download(String remoteFileName, OutputStream outputStream) {
-        try {
-            open();
-            return ftp.retrieveFile(remoteFileName, outputStream);
-        } catch (IOException exception) {
+            return command.execute(ftp);
+        } catch (Exception exception) {
             throw new PlatformException(exception);
         } finally {
             close();

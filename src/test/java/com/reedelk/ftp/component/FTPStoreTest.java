@@ -19,9 +19,9 @@ import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FTPUploadTest extends AbstractTest {
+public class FTPStoreTest extends AbstractTest {
 
-    private FTPUpload component;
+    private FTPStore component;
 
     @Mock
     private ConverterService converterService;
@@ -35,7 +35,7 @@ public class FTPUploadTest extends AbstractTest {
         configuration.setUsername(TEST_USERNAME);
         configuration.setPassword(TEST_PASSWORD);
 
-        component = new FTPUpload();
+        component = new FTPStore();
         component.scriptEngine = scriptEngine;
         component.converterService = converterService;
         component.setConfiguration(configuration);

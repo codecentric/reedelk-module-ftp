@@ -1,5 +1,6 @@
 package com.reedelk.ftp.component;
 
+import com.reedelk.ftp.internal.CommandRetrieve;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDownloadException;
 import com.reedelk.runtime.api.annotation.ModuleComponent;
@@ -44,7 +45,8 @@ public class FTPRetrieve implements ProcessorSync {
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            boolean success = provider.download(downloadFileName, outputStream);
+            CommandRetrieve command = new CommandRetrieve(downloadFileName, outputStream);
+            boolean success = provider.execute(command);
             if (!success)  {
                 throw new FTPDownloadException("Error could not be downloaded");
             }

@@ -1,5 +1,6 @@
 package com.reedelk.ftp.component;
 
+import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.FTPFileMapper;
 import com.reedelk.runtime.api.annotation.ModuleComponent;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
-import static com.reedelk.runtime.api.commons.StringUtils.isNotBlank;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -47,9 +47,9 @@ public class FTPList implements ProcessorSync {
 
         String workingDir = configuration.getWorkingDir();
 
-        FTPFile[] files = isNotBlank(workingDir) ?
-                provider.list(workingDir) :
-                provider.list();
+        CommandList commandList = new CommandList(workingDir, recursive, filesOnly, directoriesOnly);
+
+        FTPFile[] files = provider.execute(commandList);
 
         List allFiles = stream(files).map(new FTPFileMapper()).collect(toList());
 
