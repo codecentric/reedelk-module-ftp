@@ -12,7 +12,8 @@
       "streaming": "AUTO",
       "response": {
         "body": "#[message.payload()]",
-        "status": 200
+        "status": 200,
+        "headers": {"assd": "#['superzz34']"}
       },
       "errorResponse": {
         "body": "#[error]",
@@ -22,20 +23,31 @@
     {
       "implementor": "com.reedelk.core.component.PayloadSet",
       "description": "Payload Set",
-      "mimeType": "*/*",
-      "payload": "#[{ one: 'one123', two: 'two234' }]"
-    },
-    {
-      "implementor": "com.reedelk.core.component.ScriptEvaluator",
-      "description": "Script",
       "mimeType": "text/plain",
-      "script": "test.js"
+      "payload": "#[{ one: 'one123', two: 'two234432234' }]"
     },
     {
-      "implementor": "com.reedelk.core.component.LoggerComponent",
-      "description": "Logger",
-      "level": "DEBUG",
-      "message": "#['yep']"
+      "implementor": "com.reedelk.runtime.component.Router",
+      "when": [
+        {
+          "condition": "#[message.payload().contains('zq')]",
+          "next": [{
+            "implementor": "com.reedelk.core.component.PayloadSet",
+            "description": "Payload Set",
+            "mimeType": "*/*",
+            "payload": "two stuff"
+          }]
+        },
+        {
+          "condition": "otherwise",
+          "next": [{
+            "implementor": "com.reedelk.core.component.PayloadSet",
+            "description": "Payload Set",
+            "mimeType": "*/*",
+            "payload": "#[message.payload()]"
+          }]
+        }
+      ]
     }
   ]
 }
