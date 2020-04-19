@@ -7,6 +7,7 @@ import com.reedelk.runtime.api.annotation.ModuleComponent;
 import com.reedelk.runtime.api.annotation.Property;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.converter.ConverterService;
+import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -49,8 +50,6 @@ public class UploadFile implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        provider.open();
-
         String uploadFileName = scriptEngine.evaluate(fileName, flowContext, message)
                 .orElseThrow(() -> new FTPUploadException("File name was null"));
 
@@ -58,10 +57,9 @@ public class UploadFile implements ProcessorSync {
             // We must convert the payload to byte array. Here should consider if it is a stream or not.
             Object payload = message.payload();
             byte[] data = converterService.convert(payload, byte[].class);
-
             return upload(uploadFileName, data);
-        } else {
 
+        } else {
             byte[] evaluatedUploadData = scriptEngine.evaluate(uploadData, flowContext, message)
                     .orElseThrow(() -> new FTPUploadException("Upload data was null"));
             return upload(uploadFileName, evaluatedUploadData);
@@ -86,15 +84,11 @@ public class UploadFile implements ProcessorSync {
             if (!success) {
                 throw new FTPDownloadException("Error could not be uploaded");
             }
-
             return MessageBuilder.get(DownloadFile.class)
                     .withBinary(data)
                     .build();
-
-        } catch (IOException exception) {
-            throw new FTPDownloadException("erro");
-        } finally {
-            provider.close();
+        } catch (IOException e) {
+            throw new PlatformException(e);
         }
     }
 }

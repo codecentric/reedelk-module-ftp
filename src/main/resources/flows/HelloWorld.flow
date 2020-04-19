@@ -36,6 +36,14 @@
       "description": "Logger",
       "level": "DEBUG",
       "message": "#['yep']"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.DownloadFile",
+      "description": "FTP Download File"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.ListFiles",
+      "description": "FTP List Files"
     }
   ]
 }

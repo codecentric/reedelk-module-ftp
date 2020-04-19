@@ -11,11 +11,12 @@ import com.reedelk.runtime.api.message.MessageBuilder;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
+import static com.reedelk.runtime.api.commons.StringUtils.isNotBlank;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ModuleComponent("FTP List Files")
@@ -35,15 +36,13 @@ public class ListFiles implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        provider.open();
+        String workingDir = configuration.getWorkingDir();
 
-        FTPFile[] files = provider.list();
+        FTPFile[] files = isNotBlank(workingDir) ?
+                provider.list(workingDir) : provider.list();
+
         List<Map<String, Serializable>> allFiles =
-                Arrays.stream(files)
-                        .map(new FTPFileMapper())
-                        .collect(toList());
-
-        provider.close();
+                stream(files).map(new FTPFileMapper()).collect(toList());
 
         return MessageBuilder.get(ListFiles.class)
                 .withJavaObject(allFiles)

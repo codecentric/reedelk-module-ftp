@@ -39,8 +39,6 @@ public class DownloadFile implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        provider.open();
-
         String downloadFileName = scriptEngine.evaluate(fileName, flowContext, message)
                 .orElseThrow(() -> new FTPDownloadException("File name was null"));
 
@@ -57,9 +55,7 @@ public class DownloadFile implements ProcessorSync {
                     .build();
 
         } catch (IOException exception) {
-            throw new FTPDownloadException("erro");
-        } finally {
-            provider.close();
+            throw new FTPDownloadException("Error");
         }
     }
 

@@ -12,13 +12,14 @@ public class ConnectionConfiguration implements Implementor {
     @Property("FTP Host")
     @Hint("ftp.my.domain.com")
     @Example("ftp.my.domain.com")
-    @Description("The connection URL is a string that a MongoDB driver uses to connect to a database. " +
-            "It can contain information such as where to search for the database, " +
-            "the name of the database to connect to, and configuration properties.")
+    @Description("Sets the connection host the FTP client should connect to.")
     private String host;
 
     @Property("FTP Port")
-    private int port;
+    @Hint("21")
+    @Example("21")
+    @Description("Sets the connection port the FTP client should use for the connection.")
+    private Integer port;
 
     @Property("Username")
     @Hint("myFTPUser")
@@ -27,6 +28,7 @@ public class ConnectionConfiguration implements Implementor {
     private String username;
 
     @Property("Password")
+    @Password
     @Hint("myFTPUser")
     @Example("myFTPUser")
     @Description("The username to be used to create the FTP connection.")
@@ -46,11 +48,11 @@ public class ConnectionConfiguration implements Implementor {
         this.host = host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -68,5 +70,13 @@ public class ConnectionConfiguration implements Implementor {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getWorkingDir() {
+        return workingDir;
+    }
+
+    public void setWorkingDir(String workingDir) {
+        this.workingDir = workingDir;
     }
 }
