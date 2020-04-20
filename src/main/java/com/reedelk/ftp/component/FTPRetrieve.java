@@ -3,10 +3,8 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandRetrieve;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
-import com.reedelk.ftp.internal.exception.FTPDeleteException;
-import com.reedelk.ftp.internal.exception.FTPDownloadException;
-import com.reedelk.ftp.internal.exception.FTPListException;
-import com.reedelk.ftp.internal.exception.FTPUploadException;
+import com.reedelk.ftp.internal.commons.Utils;
+import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.exception.PlatformException;
@@ -24,7 +22,8 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static com.reedelk.ftp.internal.commons.Messages.FTPRetrieve.ERROR_GENERIC;
+import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.TYPE_NOT_SUPPORTED;
+import static com.reedelk.ftp.internal.commons.Messages.FTPRetrieve.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Retrieve")
@@ -62,25 +61,20 @@ public class FTPRetrieve implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String remoteFileName;
+        String remotePath;
         if (isNullOrBlank(path)) {
-            TypedContent<?, ?> content = message.content();
-            if (content instanceof StringContent) {
-                remoteFileName = ((StringContent) content).data();
-            } else {
-                throw new FTPDeleteException("Type not supported");
-            }
+            remotePath = pathFromPayloadOrThrow(message);
         } else {
-            remoteFileName = scriptEngine.evaluate(path, flowContext, message)
-                    .orElseThrow(() -> new FTPUploadException("File name was null"));
+            remotePath = scriptEngine.evaluate(path, flowContext, message)
+                    .orElseThrow(() -> new FTPRetrieveException(PATH_EMPTY.format(path)));
         }
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            CommandRetrieve command = new CommandRetrieve(remoteFileName, outputStream);
+            CommandRetrieve command = new CommandRetrieve(remotePath, outputStream);
             boolean success = provider.execute(command, exceptionMapper);
             if (!success)  {
-                throw new FTPDownloadException("Error could not be downloaded");
+                throw new FTPRetrieveException(NOT_SUCCESS.format(remotePath));
             }
 
             byte[] data = outputStream.toByteArray();
@@ -89,7 +83,8 @@ public class FTPRetrieve implements ProcessorSync {
                     .build();
 
         } catch (IOException exception) {
-            throw new FTPDownloadException("Error");
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            throw new FTPRetrieveException(error, exception);
         }
     }
 
@@ -101,18 +96,28 @@ public class FTPRetrieve implements ProcessorSync {
         this.path = path;
     }
 
+    private String pathFromPayloadOrThrow(Message message) {
+        TypedContent<?, ?> content = message.content();
+        if (content instanceof StringContent) {
+            return ((StringContent) content).data();
+        } else {
+            String error = TYPE_NOT_SUPPORTED.format(Utils.classNameOrNull(content));
+            throw new FTPRetrieveException(error);
+        }
+    }
+
     private static class FTPRetrieveExceptionMapper implements ExceptionMapper {
 
         @Override
         public PlatformException from(Exception exception) {
             String error = ERROR_GENERIC.format(exception.getMessage());
-            return new FTPListException(error, exception);
+            return new FTPRetrieveException(error, exception);
         }
 
         @Override
         public PlatformException from(String error) {
             String message = ERROR_GENERIC.format(error);
-            return new FTPDeleteException(message);
+            return new FTPRetrieveException(message);
         }
     }
 }

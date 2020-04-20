@@ -2,7 +2,7 @@ package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.CommandStore;
 import com.reedelk.ftp.internal.FTPClientProvider;
-import com.reedelk.ftp.internal.exception.FTPDownloadException;
+import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.ftp.internal.exception.FTPUploadException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
@@ -98,7 +98,7 @@ public class FTPStore implements ProcessorSync {
             CommandStore command = new CommandStore(uploadFileName, inputStream);
             boolean success = provider.execute(command);
             if (!success) {
-                throw new FTPDownloadException("Error could not be uploaded");
+                throw new FTPRetrieveException("Error could not be uploaded");
             }
 
             return MessageBuilder.get(FTPRetrieve.class)
