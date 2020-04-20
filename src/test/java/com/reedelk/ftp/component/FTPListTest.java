@@ -196,11 +196,10 @@ class FTPListTest extends AbstractTest {
         List<Map<String, Serializable>> payload = actual.payload();
         assertThat(payload).hasSize(3);
 
-        assertContainsFileWithName(payload, "company");
-        assertContainsFileWithName(payload, "document1.txt");
-        assertContainsFileWithName(payload, "document2.txt");
+        assertContainsFileWithName(payload, "company", "/data/documents");
+        assertContainsFileWithName(payload, "document1.txt", "/data/documents");
+        assertContainsFileWithName(payload, "document2.txt", "/data/documents");
     }
-
 
     @Override
     protected void configure(FileSystem fileSystem) {
@@ -229,5 +228,13 @@ class FTPListTest extends AbstractTest {
             if (file.get("name").equals(expectedFileName)) return;
         }
         fail("Could not find file with name=" + expectedFileName);
+    }
+
+    private void assertContainsFileWithName(List<Map<String, Serializable>> files, String expectedFileName, String expectedPath) {
+        for (Map<String, Serializable> file : files) {
+            if (file.get("name").equals(expectedFileName) &&
+                    file.get("path").equals(expectedPath)) return;
+        }
+        fail("Could not find file with name=" + expectedFileName + ", and path=" + expectedPath);
     }
 }
