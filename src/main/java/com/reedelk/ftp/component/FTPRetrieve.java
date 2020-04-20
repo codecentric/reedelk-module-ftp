@@ -22,7 +22,6 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.TYPE_NOT_SUPPORTED;
 import static com.reedelk.ftp.internal.commons.Messages.FTPRetrieve.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 

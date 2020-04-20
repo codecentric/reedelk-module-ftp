@@ -61,4 +61,23 @@ public class Messages {
             return message;
         }
     }
+
+    public enum FTPStore implements FormattedMessage {
+
+        ERROR_GENERIC("An error occurred while executing FTP Store operation, cause=[%s]"),
+        NOT_SUCCESS("The file with path=[%s] could not be successfully stored."),
+        PATH_EMPTY("The path and name of the file to store to the remote FTP server was empty or null (DynamicValue=[%s])."),
+        CONTENT_EMPTY("The data content of the file to store to the remote FTP server was empty or null (DynamicValue=[%s]).");
+
+        private final String message;
+
+        FTPStore(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String template() {
+            return message;
+        }
+    }
 }

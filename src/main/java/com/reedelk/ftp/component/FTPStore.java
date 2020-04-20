@@ -1,9 +1,9 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.CommandStore;
+import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
-import com.reedelk.ftp.internal.exception.FTPRetrieveException;
-import com.reedelk.ftp.internal.exception.FTPUploadException;
+import com.reedelk.ftp.internal.exception.FTPStoreException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.converter.ConverterService;
@@ -21,6 +21,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static com.reedelk.ftp.internal.commons.Messages.FTPStore.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
@@ -55,28 +56,31 @@ public class FTPStore implements ProcessorSync {
     ConverterService converterService;
 
     private FTPClientProvider provider;
+    private ExceptionMapper exceptionMapper;
 
     @Override
     public void initialize() {
         provider = new FTPClientProvider(FTPStore.class, connection);
+        exceptionMapper = new FTPStoreExceptionMapper();
     }
 
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String remoteFilePath = scriptEngine.evaluate(path, flowContext, message)
-                .orElseThrow(() -> new FTPUploadException("File name was null"));
+        String remotePath = scriptEngine.evaluate(path, flowContext, message)
+                .orElseThrow(() -> new FTPStoreException(PATH_EMPTY.format(path)));
 
         if (isNullOrBlank(content)) {
-            // We must convert the payload to byte array. Here should consider if it is a stream or not.
+            // We must convert the payload to byte array because we have to upload
+            // bytes to the remote FTP server.
             Object payload = message.payload();
             byte[] data = converterService.convert(payload, byte[].class);
-            return upload(remoteFilePath, data);
+            return upload(remotePath, data);
 
         } else {
-            byte[] evaluatedUploadData = scriptEngine.evaluate(content, flowContext, message)
-                    .orElseThrow(() -> new FTPUploadException("Upload data was null")); // Should this one write an empty file?
-            return upload(remoteFilePath, evaluatedUploadData);
+            byte[] contentAsBytes = scriptEngine.evaluate(content, flowContext, message)
+                    .orElseThrow(() -> new FTPStoreException(CONTENT_EMPTY.format(content)));
+            return upload(remotePath, contentAsBytes);
         }
     }
 
@@ -92,20 +96,37 @@ public class FTPStore implements ProcessorSync {
         this.path = path;
     }
 
-    private Message upload(String uploadFileName, byte[] data) {
+    private Message upload(String remotePath, byte[] data) {
+
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
 
-            CommandStore command = new CommandStore(uploadFileName, inputStream);
-            boolean success = provider.execute(command);
+            CommandStore command = new CommandStore(remotePath, inputStream);
+            boolean success = provider.execute(command, exceptionMapper);
             if (!success) {
-                throw new FTPRetrieveException("Error could not be uploaded");
+                throw new FTPStoreException(NOT_SUCCESS.format(remotePath));
             }
 
             return MessageBuilder.get(FTPRetrieve.class)
                     .withJavaObject(true)
                     .build();
         } catch (IOException exception) {
-            throw new PlatformException(exception);
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            throw new FTPStoreException(error, exception);
+        }
+    }
+
+    private static class FTPStoreExceptionMapper implements ExceptionMapper {
+
+        @Override
+        public PlatformException from(Exception exception) {
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            return new FTPStoreException(error, exception);
+        }
+
+        @Override
+        public PlatformException from(String error) {
+            String message = ERROR_GENERIC.format(error);
+            return new FTPStoreException(message);
         }
     }
 }
