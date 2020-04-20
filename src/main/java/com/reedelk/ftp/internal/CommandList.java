@@ -2,20 +2,25 @@ package com.reedelk.ftp.internal;
 
 import com.reedelk.ftp.internal.commons.Default;
 import com.reedelk.ftp.internal.commons.Utils;
-import com.reedelk.runtime.api.commons.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
+import static com.reedelk.runtime.api.commons.StringUtils.EMPTY;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
-public class CommandList implements Command<List<FTPFile>> {
+@SuppressWarnings("rawtypes")
+public class CommandList implements Command<List<Map>> {
+
+    private static final FTPFileMapper mapper = new FTPFileMapper();
 
     private final String path;
     private final boolean recursive;
@@ -29,58 +34,71 @@ public class CommandList implements Command<List<FTPFile>> {
         this.directoriesOnly = Optional.ofNullable(directoriesOnly).orElse(Default.DIRECTORIES_ONLY);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public List<FTPFile> execute(FTPClient client) throws IOException {
+    public List<Map> execute(FTPClient client) throws IOException {
+        return recursive ?
+                listRecursively(client) :
+                list(client);
+    }
 
-        List<FTPFile> ftpFiles = recursive ?
-                listDirectory(client, path) : asList(client.listFiles(path));
+    private List<Map> list(FTPClient client) throws IOException {
+        FTPFile[] files = client.listFiles(path);
+        return stream(files)
+                .map(file -> FTPFileWithPath.from(path, file))
+                .map(mapper)
+                .filter(predicates().stream().reduce(x->true, Predicate::and))
+                .collect(toList());
+    }
 
-        List<Predicate<FTPFile>> allPredicates = new ArrayList<>();
-        applyPredicates(allPredicates);
-
-        return ftpFiles
+    private List<Map> listRecursively(FTPClient client) throws IOException {
+        return listRecursively(client, path, EMPTY)
                 .stream()
-                .filter(allPredicates.stream().reduce(x->true, Predicate::and))
-                .collect(Collectors.toList());
+                .map(mapper)
+                .filter(predicates().stream().reduce(x->true, Predicate::and))
+                .collect(toList());
     }
 
-    private void applyPredicates(List<Predicate<FTPFile>> allPredicates) {
-        if (filesOnly) allPredicates.add(FILES_ONLY);
-        if (directoriesOnly) allPredicates.add(DIRECTORIES_ONLY);
-    }
+    private List<FTPFileWithPath> listRecursively(FTPClient client, String parentDir, String currentDir) throws IOException {
 
-    private static final Predicate<FTPFile> FILES_ONLY = FTPFile::isFile;
-
-    private static final Predicate<FTPFile> DIRECTORIES_ONLY = FTPFile::isDirectory;
-
-    List<FTPFile> listDirectory(FTPClient client, String dirToList) throws IOException {
-        return listDirectory(client, dirToList, "", 0);
-    }
-
-    // TODO: Add the path info to the file when recursive as well.
-    List<FTPFile> listDirectory(FTPClient client, String parentDir, String currentDir, int level) throws IOException {
         String dirToList = parentDir;
-        if (!StringUtils.EMPTY.equals(currentDir)) {
+        if (!EMPTY.equals(currentDir)) {
             dirToList += Utils.FTP_PATH_SEPARATOR + currentDir;
         }
+
         FTPFile[] subFiles = client.listFiles(dirToList);
-        List<FTPFile> allFiles = new ArrayList<>();
+
+        List<FTPFileWithPath> allFiles = new ArrayList<>();
 
         if (subFiles != null && subFiles.length > 0) {
-            for (FTPFile aFile : subFiles) {
-                String currentFileName = aFile.getName();
+
+            for (FTPFile currentFile : subFiles) {
+
+                String currentFileName = currentFile.getName();
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     // skip parent directory and directory itself
                     continue;
                 }
-                if (aFile.isDirectory()) {
-                    List<FTPFile> ftpFiles = listDirectory(client, dirToList, currentFileName, level + 1);
-                    allFiles.addAll(ftpFiles);
+
+                if (currentFile.isDirectory()) {
+                    List<FTPFileWithPath> fileWithPaths =
+                            listRecursively(client, dirToList, currentFileName);
+
+                    allFiles.add(FTPFileWithPath.from(dirToList, currentFile));
+                    allFiles.addAll(fileWithPaths);
+
                 } else {
-                    allFiles.add(aFile);
+                    allFiles.add(FTPFileWithPath.from(dirToList, currentFile));
                 }
             }
         }
         return allFiles;
+    }
+
+    private List<Predicate<Map<String, Serializable>>> predicates() {
+        List<Predicate<Map<String, Serializable>>> allPredicates = new ArrayList<>();
+        if (filesOnly) allPredicates.add(FTPFileMapper.FILES_ONLY);
+        if (directoriesOnly) allPredicates.add(FTPFileMapper.DIRECTORIES_ONLY);
+        return allPredicates;
     }
 }

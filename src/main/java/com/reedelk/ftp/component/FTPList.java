@@ -3,7 +3,6 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
-import com.reedelk.ftp.internal.FTPFileMapper;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.annotation.*;
@@ -14,7 +13,6 @@ import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
-import org.apache.commons.net.ftp.FTPFile;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -25,7 +23,6 @@ import java.util.Map;
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.ERROR_GENERIC;
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNotNullOrBlank;
-import static java.util.stream.Collectors.toList;
 
 @ModuleComponent("FTP List Files")
 @Description("The FTP List Files component allows to list all the files from a remote FTP server directory. " +
@@ -85,7 +82,7 @@ public class FTPList implements ProcessorSync {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
@@ -99,15 +96,10 @@ public class FTPList implements ProcessorSync {
         CommandList commandList =
                 new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
 
-        List<FTPFile> files = provider.execute(commandList, exceptionMapper);
-
-        List allFiles = files
-                .stream()
-                .map(new FTPFileMapper())
-                .collect(toList());
+        List<Map> files = provider.execute(commandList, exceptionMapper);
 
         return MessageBuilder.get(FTPList.class)
-                .withList(allFiles, Map.class)
+                .withList(files, Map.class)
                 .build();
     }
 
