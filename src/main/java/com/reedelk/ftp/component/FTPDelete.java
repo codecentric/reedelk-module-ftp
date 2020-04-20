@@ -21,6 +21,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.*;
 import static com.reedelk.ftp.internal.commons.Utils.classNameOrNull;
+import static com.reedelk.ftp.internal.commons.Utils.joinPath;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Delete")
@@ -65,12 +66,15 @@ public class FTPDelete implements ProcessorSync {
     public Message apply(FlowContext flowContext, Message message) {
 
         // We use the payload if the path is not given.
-        String remotePath = connection.getWorkingDir();
+        String remotePath;
         if (isNullOrBlank(path)) {
-            remotePath += pathFromPayloadOrThrow(message);
+            String pathToAdd = pathFromPayloadOrThrow(message);
+            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
+
         } else {
-            remotePath += scriptEngine.evaluate(path, flowContext, message)
+            String pathToAdd = scriptEngine.evaluate(path, flowContext, message)
                             .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path.value())));
+            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
         }
 
         Command<Boolean> command = new CommandDeleteFile(remotePath);

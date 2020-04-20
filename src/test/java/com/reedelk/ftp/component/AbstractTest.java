@@ -50,7 +50,7 @@ abstract class AbstractTest {
         fakeFtpServer.start();
 
         connection = new ConnectionConfiguration();
-        connection.setPort(fakeFtpServer.getServerControlPort());
+        connection.setPort(getServerPort());
         connection.setType(ConnectionType.FTP);
         connection.setHost(TEST_HOST);
         connection.setUsername(TEST_USERNAME);
@@ -88,5 +88,9 @@ abstract class AbstractTest {
 
     protected FileSystem getFileSystem() {
         return fileSystem;
+    }
+
+    protected static int getServerPort() {
+        return fakeFtpServer.getServerControlPort();
     }
 }

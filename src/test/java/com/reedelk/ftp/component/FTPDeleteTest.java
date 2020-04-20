@@ -31,7 +31,7 @@ class FTPDeleteTest extends AbstractTest {
     }
 
     @Test
-    void shouldSuccessfullyDeleteFileFile() {
+    void shouldSuccessfullyDeleteFile() {
         // Given
         String path = "/data/foobar.txt";
         component.setPath(DynamicString.from(path));
@@ -91,6 +91,54 @@ class FTPDeleteTest extends AbstractTest {
         assertThat(thrown)
                 .hasMessage("The path and name of the file to delete from the " +
                         "remote FTP server was null (DynamicValue=[#[context.varWhichDoesNotExist]]).");
+    }
+
+    @Test
+    void shouldDeleteFileByConcatenatingPathWithWorkingDirectory() {
+        // Given
+        connection = new ConnectionConfiguration();
+        connection.setPort(getServerPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setWorkingDir("/data");
+        connection.setUsername(TEST_USERNAME);
+        connection.setPassword(TEST_PASSWORD);
+
+        String path = "/foobar.txt";
+        component.setPath(DynamicString.from(path));
+        component.setConnection(connection);
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class).empty().build();
+
+        // When
+        Message actual = component.apply(context, message);
+
+        // Then
+        boolean isSuccess = actual.payload();
+        assertThat(isSuccess).isTrue();
+
+        boolean exists = getFileSystem().exists(path);
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void shouldTakePathFromPayloadWhenPathPropertyIsNull() {
+        // Given
+        String path = "/data/foobar.txt";
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class).withText(path).build();
+
+        // When
+        Message actual = component.apply(context, message);
+
+        // Then
+        boolean isSuccess = actual.payload();
+        assertThat(isSuccess).isTrue();
+
+        boolean exists = getFileSystem().exists(path);
+        assertThat(exists).isFalse();
     }
 
     @Override
