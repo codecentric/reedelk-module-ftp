@@ -28,7 +28,13 @@
       "implementor": "com.reedelk.ftp.component.FTPList",
       "description": "FTP List Files",
       "connection": {"ref": "4a47934f-309a-4173-a420-26dca9f3a5b7"},
-      "path": "/www.reedelk.com"
+      "path": "/www.reedelk.com/maven"
+    },
+    {
+      "implementor": "com.reedelk.json.component.ObjectToJSON",
+      "description": "Object to JSON",
+      "indentFactor": 2,
+      "prettyPrint": true
     }
   ]
 }

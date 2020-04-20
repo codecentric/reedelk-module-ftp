@@ -8,11 +8,12 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 public class CommandList implements Command<List<FTPFile>> {
 
@@ -32,8 +33,7 @@ public class CommandList implements Command<List<FTPFile>> {
     public List<FTPFile> execute(FTPClient client) throws IOException {
 
         List<FTPFile> ftpFiles = recursive ?
-                listDirectory(client, path) :
-                Arrays.asList(client.listFiles(path));
+                listDirectory(client, path) : asList(client.listFiles(path));
 
         List<Predicate<FTPFile>> allPredicates = new ArrayList<>();
         applyPredicates(allPredicates);
@@ -57,6 +57,7 @@ public class CommandList implements Command<List<FTPFile>> {
         return listDirectory(client, dirToList, "", 0);
     }
 
+    // TODO: Add the path info to the file when recursive as well.
     List<FTPFile> listDirectory(FTPClient client, String parentDir, String currentDir, int level) throws IOException {
         String dirToList = parentDir;
         if (!StringUtils.EMPTY.equals(currentDir)) {

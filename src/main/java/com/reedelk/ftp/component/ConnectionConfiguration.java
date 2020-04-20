@@ -15,8 +15,18 @@ import static com.reedelk.ftp.internal.commons.Utils.FTP_PATH_SEPARATOR;
 public class ConnectionConfiguration implements Implementor {
 
     @Property("Connection type")
-    @DefaultValue("FTP")
+    @Example("FTP")
+    @DefaultValue("FTPS")
+    @Description("Sets the type of connection to be established with the remote server. " +
+            "FTPs uses TLS, FTP is plain connection.")
     private ConnectionType type;
+
+    @Property("Connection mode")
+    @Example("ACTIVE")
+    @DefaultValue("PASSIVE")
+    @Description("Sets the connection mode to be used for the FTP connection (Active or Passive). " +
+            "If you are behind firewall use Passive which is the default connection mode.")
+    private ConnectionMode mode;
 
     @Property("FTP Host")
     @Hint("ftp.my.domain.com")
@@ -97,5 +107,13 @@ public class ConnectionConfiguration implements Implementor {
 
     public void setWorkingDir(String workingDir) {
         this.workingDir = workingDir;
+    }
+
+    public ConnectionMode getMode() {
+        return mode;
+    }
+
+    public void setMode(ConnectionMode mode) {
+        this.mode = mode;
     }
 }
