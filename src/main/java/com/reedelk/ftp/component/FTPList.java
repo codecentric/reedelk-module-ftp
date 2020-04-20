@@ -49,9 +49,12 @@ public class FTPList implements ProcessorSync {
 
         CommandList commandList = new CommandList(workingDir, recursive, filesOnly, directoriesOnly);
 
-        FTPFile[] files = provider.execute(commandList);
+        List<FTPFile> files = provider.execute(commandList);
 
-        List allFiles = stream(files).map(new FTPFileMapper()).collect(toList());
+        List allFiles = files
+                .stream()
+                .map(new FTPFileMapper())
+                .collect(toList());
 
         return MessageBuilder.get(FTPList.class)
                 .withList(allFiles, Map.class)
