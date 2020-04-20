@@ -44,7 +44,7 @@ public class FTPStoreTest extends AbstractTest {
     @Test
     void shouldCorrectlyUploadData() throws IOException {
         // Given
-        component.setFileName(DynamicString.from("/myFile.txt"));
+        component.setPath(DynamicString.from("/myFile.txt"));
         component.initialize();
         String textData = "My data";
         Mockito.doReturn(textData.getBytes()).when(converterService).convert(textData, byte[].class);

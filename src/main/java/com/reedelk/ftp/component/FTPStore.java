@@ -4,8 +4,7 @@ import com.reedelk.ftp.internal.CommandStore;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDownloadException;
 import com.reedelk.ftp.internal.exception.FTPUploadException;
-import com.reedelk.runtime.api.annotation.ModuleComponent;
-import com.reedelk.runtime.api.annotation.Property;
+import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.converter.ConverterService;
 import com.reedelk.runtime.api.exception.PlatformException;
@@ -29,11 +28,15 @@ public class FTPStore implements ProcessorSync {
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
 
-    @Property("File name")
-    private DynamicString fileName;
+    @Property("Path")
+    @Hint("/documents/my-document.pdf")
+    @Example("/documents/my-document.pdf")
+    @Description("The path ")
+    private DynamicString path;
 
-    @Property("Upload data")
-    private DynamicByteArray uploadData;
+    @Property("Content") // Comes from the body (payload)
+    @DefaultValue("#[message.payload()]")
+    private DynamicByteArray content;
 
     @Reference
     ScriptEngineService scriptEngine;
@@ -51,17 +54,17 @@ public class FTPStore implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String uploadFileName = scriptEngine.evaluate(fileName, flowContext, message)
+        String uploadFileName = scriptEngine.evaluate(path, flowContext, message)
                 .orElseThrow(() -> new FTPUploadException("File name was null"));
 
-        if (isNullOrBlank(uploadData)) {
+        if (isNullOrBlank(content)) {
             // We must convert the payload to byte array. Here should consider if it is a stream or not.
             Object payload = message.payload();
             byte[] data = converterService.convert(payload, byte[].class);
             return upload(uploadFileName, data);
 
         } else {
-            byte[] evaluatedUploadData = scriptEngine.evaluate(uploadData, flowContext, message)
+            byte[] evaluatedUploadData = scriptEngine.evaluate(content, flowContext, message)
                     .orElseThrow(() -> new FTPUploadException("Upload data was null")); // Should this one write an empty file?
             return upload(uploadFileName, evaluatedUploadData);
         }
@@ -71,12 +74,12 @@ public class FTPStore implements ProcessorSync {
         this.configuration = configuration;
     }
 
-    public void setUploadData(DynamicByteArray uploadData) {
-        this.uploadData = uploadData;
+    public void setContent(DynamicByteArray content) {
+        this.content = content;
     }
 
-    public void setFileName(DynamicString fileName) {
-        this.fileName = fileName;
+    public void setPath(DynamicString path) {
+        this.path = path;
     }
 
     private Message upload(String uploadFileName, byte[] data) {

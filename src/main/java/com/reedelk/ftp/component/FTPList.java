@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
-import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @ModuleComponent("FTP List Files")

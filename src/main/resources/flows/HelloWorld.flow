@@ -22,14 +22,29 @@
         "body": "#[error]",
         "status": 500,
         "headers": {"fffff": "#[]"}
-      },
-      "openApi": {"responses": {"ddddd": {}}}
+      }
     },
     {
       "implementor": "com.reedelk.core.component.PayloadSet",
       "description": "Payload Set",
       "mimeType": "text/plain",
       "payload": "#[{ one: 'one123', two: 'two234432234' }]"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.FTPStore",
+      "description": "FTP Store"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.FTPList",
+      "description": "FTP List Files"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.FTPRetrieve",
+      "description": "FTP Retrieve"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.FTPDelete",
+      "description": "FTP Delete"
     }
   ]
 }

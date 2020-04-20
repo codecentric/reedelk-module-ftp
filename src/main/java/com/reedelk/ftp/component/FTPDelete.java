@@ -1,6 +1,7 @@
 package com.reedelk.ftp.component;
 
-import com.reedelk.ftp.internal.CommandDelete;
+import com.reedelk.ftp.internal.Command;
+import com.reedelk.ftp.internal.CommandDeleteFile;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.runtime.api.annotation.Description;
@@ -10,13 +11,13 @@ import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
-import com.reedelk.runtime.api.message.content.ListContent;
 import com.reedelk.runtime.api.message.content.StringContent;
 import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.osgi.service.component.annotations.Reference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
@@ -28,6 +29,9 @@ public class FTPDelete implements ProcessorSync {
     @Property("Connection")
     @Description("FTP connection configuration to be used by this delete operation.")
     private ConnectionConfiguration configuration;
+
+    @Property("File name")
+    private DynamicString fileName;
 
     private FTPClientProvider provider;
 
@@ -45,15 +49,12 @@ public class FTPDelete implements ProcessorSync {
 
         TypedContent<?, ?> content = message.content();
 
-        CommandDelete command;
+        Command<Boolean> command;
         if (content instanceof StringContent) {
             String remoteFileName = ((StringContent) content).data();
-            command = new CommandDelete(remoteFileName);
-        } else if (content instanceof ListContent<?>){
-            List<String> listOfItems = ((ListContent<String>) content).data();
-            command = new CommandDelete(listOfItems);
+            command = new CommandDeleteFile(remoteFileName);
         } else {
-            throw new IllegalStateException("");
+            throw new FTPDeleteException("Type not supported");
         }
 
         boolean success = provider.execute(command);
