@@ -1,6 +1,6 @@
 package com.reedelk.ftp.component;
 
-import com.reedelk.ftp.internal.CommandRetrieve;
+import com.reedelk.ftp.internal.CommandDelete;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDownloadException;
 import com.reedelk.runtime.api.annotation.ModuleComponent;
@@ -13,13 +13,10 @@ import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.osgi.service.component.annotations.Reference;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
 
 @ModuleComponent("FTP Retrieve")
-public class FTPRetrieve implements ProcessorSync {
+public class FTPDelete implements ProcessorSync {
 
     @Property("Connection Configuration")
     private ConnectionConfiguration configuration;
@@ -41,25 +38,18 @@ public class FTPRetrieve implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String downloadFileName = scriptEngine.evaluate(fileName, flowContext, message)
+        String remoteFileName = scriptEngine.evaluate(fileName, flowContext, message)
                 .orElseThrow(() -> new FTPDownloadException("File name was null"));
 
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-
-            CommandRetrieve command = new CommandRetrieve(downloadFileName, outputStream);
-            boolean success = provider.execute(command);
-            if (!success)  {
-                throw new FTPDownloadException("Error could not be downloaded");
-            }
-
-            byte[] data = outputStream.toByteArray();
-            return MessageBuilder.get(FTPRetrieve.class)
-                    .withBinary(data)
-                    .build();
-
-        } catch (IOException exception) {
-            throw new FTPDownloadException("Error");
+        CommandDelete command = new CommandDelete(remoteFileName);
+        boolean success = provider.execute(command);
+        if (!success)  {
+            throw new FTPDownloadException("Error could not be downloaded");
         }
+
+        return MessageBuilder.get(FTPDelete.class)
+                .withJavaObject(success)
+                .build();
     }
 
     public void setConfiguration(ConnectionConfiguration configuration) {

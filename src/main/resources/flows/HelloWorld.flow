@@ -13,41 +13,23 @@
       "response": {
         "body": "#[message.payload()]",
         "status": 200,
-        "headers": {"assd": "#['superzz34']"}
+        "headers": {
+          "rrrff32": "#['dddd']",
+          "assd432kkl": "#['sup23er322222zz34']"
+        }
       },
       "errorResponse": {
         "body": "#[error]",
-        "status": 500
-      }
+        "status": 500,
+        "headers": {"fffff": "#[]"}
+      },
+      "openApi": {"responses": {"ddddd": {}}}
     },
     {
       "implementor": "com.reedelk.core.component.PayloadSet",
       "description": "Payload Set",
       "mimeType": "text/plain",
       "payload": "#[{ one: 'one123', two: 'two234432234' }]"
-    },
-    {
-      "implementor": "com.reedelk.runtime.component.Router",
-      "when": [
-        {
-          "condition": "#[message.payload().contains('zq')]",
-          "next": [{
-            "implementor": "com.reedelk.core.component.PayloadSet",
-            "description": "Payload Set",
-            "mimeType": "*/*",
-            "payload": "two stuff"
-          }]
-        },
-        {
-          "condition": "otherwise",
-          "next": [{
-            "implementor": "com.reedelk.core.component.PayloadSet",
-            "description": "Payload Set",
-            "mimeType": "*/*",
-            "payload": "#[message.payload()]"
-          }]
-        }
-      ]
     }
   ]
 }
