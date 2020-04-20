@@ -22,25 +22,8 @@ class FTPListTest extends AbstractTest {
     @BeforeEach
     void setUp() {
         super.setUp();
-        ConnectionConfiguration configuration = new ConnectionConfiguration();
-        configuration.setPort(getPort());
-        configuration.setHost(TEST_HOST);
-        configuration.setUsername(TEST_USERNAME);
-        configuration.setPassword(TEST_PASSWORD);
         component = new FTPList();
-        component.setConnection(configuration);
-    }
-
-    @Override
-    protected void configure(FileSystem fileSystem) {
-        fileSystem.add(new DirectoryEntry("/data"));
-        fileSystem.add(new FileEntry("/data/foobar.txt", "abcdef 1234567890"));
-    }
-
-    @Override
-    protected void clean(FileSystem fileSystem) {
-        fileSystem.delete("/data");
-        fileSystem.delete("/data/foobar.txt");
+        component.setConnection(connection);
     }
 
     @Test
@@ -61,5 +44,17 @@ class FTPListTest extends AbstractTest {
 
         Map<String, Serializable> fileEntry = payload.get(0);
         assertThat(fileEntry).containsEntry("name", "foobar.txt");
+    }
+
+    @Override
+    protected void configure(FileSystem fileSystem) {
+        fileSystem.add(new DirectoryEntry("/data"));
+        fileSystem.add(new FileEntry("/data/foobar.txt", "abcdef 1234567890"));
+    }
+
+    @Override
+    protected void clean(FileSystem fileSystem) {
+        fileSystem.delete("/data");
+        fileSystem.delete("/data/foobar.txt");
     }
 }

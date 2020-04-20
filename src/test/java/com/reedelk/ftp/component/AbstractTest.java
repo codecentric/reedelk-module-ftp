@@ -36,6 +36,8 @@ abstract class AbstractTest {
     @Mock
     protected ScriptEngineService scriptEngine;
 
+    protected static ConnectionConfiguration connection;
+
     @BeforeAll
     static void setUpAll() {
         fakeFtpServer = new FakeFtpServer();
@@ -46,6 +48,13 @@ abstract class AbstractTest {
         fakeFtpServer.setFileSystem(fileSystem);
         fakeFtpServer.setServerControlPort(TEST_PORT);
         fakeFtpServer.start();
+
+        connection = new ConnectionConfiguration();
+        connection.setPort(fakeFtpServer.getServerControlPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setUsername(TEST_USERNAME);
+        connection.setPassword(TEST_PASSWORD);
     }
 
     @BeforeEach
@@ -75,10 +84,6 @@ abstract class AbstractTest {
 
     protected void clean(FileSystem fileSystem) {
         // Subclasses might optionally extend it.
-    }
-
-    protected int getPort() {
-        return fakeFtpServer.getServerControlPort();
     }
 
     protected FileSystem getFileSystem() {

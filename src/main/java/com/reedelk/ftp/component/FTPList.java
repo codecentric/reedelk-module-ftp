@@ -94,7 +94,8 @@ public class FTPList implements ProcessorSync {
                     .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));
         }
 
-        CommandList commandList = new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
+        CommandList commandList =
+                new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
 
         List<FTPFile> files = provider.execute(commandList, exceptionMapper);
 

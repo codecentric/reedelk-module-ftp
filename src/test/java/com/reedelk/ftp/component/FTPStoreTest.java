@@ -29,16 +29,10 @@ public class FTPStoreTest extends AbstractTest {
     @BeforeEach
     void setUp() {
         super.setUp();
-        ConnectionConfiguration configuration = new ConnectionConfiguration();
-        configuration.setPort(getPort());
-        configuration.setHost(TEST_HOST);
-        configuration.setUsername(TEST_USERNAME);
-        configuration.setPassword(TEST_PASSWORD);
-
         component = new FTPStore();
         component.scriptEngine = scriptEngine;
         component.converterService = converterService;
-        component.setConnection(configuration);
+        component.setConnection(connection);
     }
 
     @Test

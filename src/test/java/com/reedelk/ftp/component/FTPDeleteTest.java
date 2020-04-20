@@ -11,22 +11,23 @@ import org.mockftpserver.fake.filesystem.FileSystem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FTPRetrieveTest extends AbstractTest {
+class FTPDeleteTest extends AbstractTest {
 
-    private FTPRetrieve component;
+    private FTPDelete component;
 
     @BeforeEach
     void setUp() {
         super.setUp();
-        component = new FTPRetrieve();
+        component = new FTPDelete();
         component.scriptEngine = scriptEngine;
         component.setConnection(connection);
     }
 
     @Test
-    void shouldRetrieveFileContentCorrectly() {
+    void shouldSuccessfullyDeleteFileFile() {
         // Given
-        component.setPath(DynamicString.from("/data/foobar.txt"));
+        String path = "/data/foobar.txt";
+        component.setPath(DynamicString.from(path));
         component.initialize();
 
         Message message = MessageBuilder.get(TestComponent.class).empty().build();
@@ -35,8 +36,11 @@ public class FTPRetrieveTest extends AbstractTest {
         Message actual = component.apply(context, message);
 
         // Then
-        byte[] data = actual.payload();
-        assertThat(new String(data)).isEqualTo("abcdef 1234567890");
+        boolean deleteSuccess = actual.payload();
+        assertThat(deleteSuccess).isTrue();
+
+        boolean existFile = getFileSystem().exists(path);
+        assertThat(existFile).isFalse();
     }
 
     @Override
