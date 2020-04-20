@@ -168,6 +168,40 @@ class FTPListTest extends AbstractTest {
         assertContainsFileWithName(payload, "company");
     }
 
+
+    @Test
+    void shouldListFilesByConcatenatingPathWithWorkingDirectory() {
+        // Given
+        ConnectionConfiguration connection = new ConnectionConfiguration();
+        connection.setPort(getServerPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setWorkingDir("/data");
+        connection.setUsername(TEST_USERNAME);
+        connection.setPassword(TEST_PASSWORD);
+
+        String path = "/documents";
+        component.setPath(DynamicString.from(path));
+        component.setConnection(connection);
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .empty()
+                .build();
+
+        // When
+        Message actual = component.apply(context, message);
+
+        // Then
+        List<Map<String, Serializable>> payload = actual.payload();
+        assertThat(payload).hasSize(3);
+
+        assertContainsFileWithName(payload, "company");
+        assertContainsFileWithName(payload, "document1.txt");
+        assertContainsFileWithName(payload, "document2.txt");
+    }
+
+
     @Override
     protected void configure(FileSystem fileSystem) {
         fileSystem.add(new DirectoryEntry("/data"));

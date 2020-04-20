@@ -98,7 +98,7 @@ class FTPDeleteTest extends AbstractTest {
     @Test
     void shouldDeleteFileByConcatenatingPathWithWorkingDirectory() {
         // Given
-        connection = new ConnectionConfiguration();
+        ConnectionConfiguration connection = new ConnectionConfiguration();
         connection.setPort(getServerPort());
         connection.setType(ConnectionType.FTP);
         connection.setHost(TEST_HOST);
