@@ -1,6 +1,6 @@
 {
   "id": "858cc32a-fc85-4b87-acf1-e03f492e9416",
-  "title": "Hello World Listener",
+  "title": "Hello World Listener (localhost:8282/api)",
   "implementor": "com.reedelk.rest.component.RESTListenerConfiguration",
   "protocol": "HTTP",
   "host": "localhost",

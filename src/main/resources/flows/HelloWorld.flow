@@ -7,7 +7,7 @@
       "implementor": "com.reedelk.rest.component.RESTListener",
       "description": "GET Hello World REST Listener",
       "configuration": {"ref": "858cc32a-fc85-4b87-acf1-e03f492e9416"},
-      "path": "/message/{name:.*}",
+      "path": "/list",
       "method": "GET",
       "streaming": "AUTO",
       "response": {
@@ -25,26 +25,10 @@
       }
     },
     {
-      "implementor": "com.reedelk.core.component.PayloadSet",
-      "description": "Payload Set",
-      "mimeType": "text/plain",
-      "payload": "#[{ one: 'one123', two: 'two234432234' }]"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPStore",
-      "description": "FTP Store"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPDelete",
-      "description": "FTP Delete"
-    },
-    {
       "implementor": "com.reedelk.ftp.component.FTPList",
-      "description": "FTP List Files"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPRetrieve",
-      "description": "FTP Retrieve"
+      "description": "FTP List Files",
+      "connection": {"ref": "4a47934f-309a-4173-a420-26dca9f3a5b7"},
+      "path": "/www.reedelk.com"
     }
   ]
 }

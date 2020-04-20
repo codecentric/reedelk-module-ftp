@@ -65,6 +65,11 @@ public class FTPStore implements ProcessorSync {
     }
 
     @Override
+    public void dispose() {
+        provider.dispose();
+    }
+
+    @Override
     public Message apply(FlowContext flowContext, Message message) {
 
         String remotePath = connection.getWorkingDir() +

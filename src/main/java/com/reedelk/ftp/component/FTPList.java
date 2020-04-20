@@ -78,6 +78,11 @@ public class FTPList implements ProcessorSync {
         exceptionMapper = new FTPListExceptionMapper();
     }
 
+    @Override
+    public void dispose() {
+        provider.dispose();
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Message apply(FlowContext flowContext, Message message) {
@@ -117,6 +122,10 @@ public class FTPList implements ProcessorSync {
 
     public void setFilesOnly(Boolean filesOnly) {
         this.filesOnly = filesOnly;
+    }
+
+    public void setPath(DynamicString path) {
+        this.path = path;
     }
 
     private static class FTPListExceptionMapper implements ExceptionMapper {

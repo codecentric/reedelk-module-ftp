@@ -69,8 +69,13 @@ abstract class AbstractTest {
         }
     }
 
-    protected void configure(FileSystem fileSystem) {}
-    protected void clean(FileSystem fileSystem) {}
+    protected void configure(FileSystem fileSystem) {
+        // Subclasses might optionally extend it.
+    }
+
+    protected void clean(FileSystem fileSystem) {
+        // Subclasses might optionally extend it.
+    }
 
     protected int getPort() {
         return fakeFtpServer.getServerControlPort();

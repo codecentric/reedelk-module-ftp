@@ -81,4 +81,8 @@ public class FTPClientProvider {
             throw exceptionMapper.from("Could not login! Username and password wrong?");
         }
     }
+
+    public void dispose() {
+        close();
+    }
 }
