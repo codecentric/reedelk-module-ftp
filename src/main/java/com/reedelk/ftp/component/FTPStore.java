@@ -14,7 +14,9 @@ import com.reedelk.runtime.api.message.MessageBuilder;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicByteArray;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,7 +24,12 @@ import java.io.IOException;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
-@Description("The FTP delete component allows to store a file to a remote FTP server.")
+@Description("The FTP Retrieve component allows to store a file to a remote FTP server. " +
+        "The path of the file to store might be a static or dynamic value. " +
+        "The path of the file is mandatory and if not present an error will be thrown by the component." +
+        "The content of the file to store can be a static or dynamic value. If not present, the content " +
+        "of the file is implicitly taken from the message payload. ")
+@Component(service = FTPStore.class, scope = ServiceScope.PROTOTYPE)
 public class FTPStore implements ProcessorSync {
 
     @Property("Connection")

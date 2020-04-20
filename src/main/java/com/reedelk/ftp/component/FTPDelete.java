@@ -14,12 +14,18 @@ import com.reedelk.runtime.api.message.content.StringContent;
 import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Delete")
-@Description("The FTP delete component allows to delete a file from a remote FTP server.")
+@Description("The FTP Delete component allows to delete a file from a remote FTP server. " +
+        "The path of the file to be deleted might be a static or dynamic value. If the path is not given, " +
+        "the name of the file to be deleted is taken from the message payload. " +
+        "An error is thrown if the payload is not of type String or if the evaluated path is empty or null.")
+@Component(service = FTPDelete.class, scope = ServiceScope.PROTOTYPE)
 public class FTPDelete implements ProcessorSync {
 
     @Property("Connection")

@@ -11,19 +11,21 @@ public class FTPFileMapper implements Function<FTPFile, Map<String, Serializable
 
     @Override
     public Map<String, Serializable> apply(FTPFile file) {
-        long timestamp = file.getTimestamp().toInstant().toEpochMilli();
-        long size = file.getSize();
-        String group = file.getGroup();
         int type = file.getType();
+
+        long size = file.getSize();
+        long timestamp = file.getTimestamp().toInstant().toEpochMilli();
+
         String name = file.getName();
-        String rawListing = file.getRawListing();
         String link = file.getLink();
         String user = file.getUser();
-        boolean directory = file.isDirectory();
+        String group = file.getGroup();
+        String rawListing = file.getRawListing();
 
-        boolean symbolicLink = file.isSymbolicLink();
-        boolean unknown = file.isUnknown();
         boolean valid = file.isValid();
+        boolean unknown = file.isUnknown();
+        boolean directory = file.isDirectory();
+        boolean symbolicLink = file.isSymbolicLink();
 
         Map<String, Serializable> fileEntry = new HashMap<>();
         fileEntry.put("timestamp", timestamp);

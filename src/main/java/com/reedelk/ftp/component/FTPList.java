@@ -3,24 +3,45 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.FTPFileMapper;
+import com.reedelk.ftp.internal.exception.FTPUploadException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
+import com.reedelk.runtime.api.script.ScriptEngineService;
+import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.apache.commons.net.ftp.FTPFile;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNotNullOrBlank;
 import static java.util.stream.Collectors.toList;
 
 @ModuleComponent("FTP List Files")
+@Description("The FTP List Files component allows to list all the files from a remote FTP server directory. " +
+        "If the property recursive is true, the listing of the files is recursive starting from the configured" +
+        "working directory in the Connection configuration. The component allows to also only list files or directories.")
+@Component(service = FTPList.class, scope = ServiceScope.PROTOTYPE)
 public class FTPList implements ProcessorSync {
 
     @Property("Connection")
     @Description("FTP connection configuration to be used to list files from.")
     private ConnectionConfiguration connection;
+
+    @Property("Path")
+    @DefaultValue("")
+    @Hint("/documents")
+    @Example("/documents")
+    @Description("The path in which files will be listed from the remote FTP server. " +
+            "The path can be a static or a dynamic value. " +
+            "If both path and working directory from the connection configuration are present they are " +
+            "appended to each other and the final path is computed as follow: /{WORKING_DIRECTORY}/{PATH}.")
+    private DynamicString path;
 
     @Property("Recursive")
     @Example("true")
@@ -40,6 +61,9 @@ public class FTPList implements ProcessorSync {
     @Description("If true only directories are listed from the working directory taken from the connection configuration.")
     private Boolean directoriesOnly;
 
+    @Reference
+    ScriptEngineService scriptEngine;
+
     private FTPClientProvider provider;
 
     @Override
@@ -51,9 +75,16 @@ public class FTPList implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String workingDir = connection.getWorkingDir();
 
-        CommandList commandList = new CommandList(workingDir, recursive, filesOnly, directoriesOnly);
+        // We use the payload if the path is not given.
+        String finalListPath = connection.getWorkingDir();
+        if (isNotNullOrBlank(path)) {
+            String remotePath = scriptEngine.evaluate(path, flowContext, message)
+                    .orElseThrow(() -> new FTPUploadException("File path was null"));
+            finalListPath += "/" + remotePath;
+        }
+
+        CommandList commandList = new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
 
         List<FTPFile> files = provider.execute(commandList);
 

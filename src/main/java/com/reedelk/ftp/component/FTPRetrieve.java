@@ -14,7 +14,9 @@ import com.reedelk.runtime.api.message.content.StringContent;
 import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,6 +24,11 @@ import java.io.IOException;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Retrieve")
+@Description("The FTP Retrieve component allows to download a file from a remote FTP server. " +
+        "The path of the file to download might be a static or dynamic value. If the path is not given, " +
+        "the name of the file to download is taken from the message payload. " +
+        "An error is thrown if the payload is not of type String or if the evaluated path is empty or null.")
+@Component(service = FTPRetrieve.class, scope = ServiceScope.PROTOTYPE)
 public class FTPRetrieve implements ProcessorSync {
 
     @Property("Connection")
