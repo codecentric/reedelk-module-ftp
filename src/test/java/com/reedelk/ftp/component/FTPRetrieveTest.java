@@ -25,7 +25,7 @@ public class FTPRetrieveTest extends AbstractTest {
         configuration.setPassword(TEST_PASSWORD);
         component = new FTPRetrieve();
         component.scriptEngine = scriptEngine;
-        component.setConfiguration(configuration);
+        component.setConnection(configuration);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class FTPRetrieveTest extends AbstractTest {
     @Test
     void shouldRetrieveFileContentCorrectly() {
         // Given
-        component.setFileName(DynamicString.from("/data/foobar.txt"));
+        component.setPath(DynamicString.from("/data/foobar.txt"));
         component.initialize();
 
         Message message = MessageBuilder.get(TestComponent.class).empty().build();

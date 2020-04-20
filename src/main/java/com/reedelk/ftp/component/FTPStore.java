@@ -24,7 +24,7 @@ import java.io.IOException;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
-@Description("The FTP Retrieve component allows to store a file to a remote FTP server. " +
+@Description("The FTP Store component allows to store a file to a remote FTP server. " +
         "The path of the file to store might be a static or dynamic value. " +
         "The path of the file is mandatory and if not present an error will be thrown by the component." +
         "The content of the file to store can be a static or dynamic value. If not present, the content " +

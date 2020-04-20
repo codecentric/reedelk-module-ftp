@@ -28,7 +28,7 @@ class FTPListTest extends AbstractTest {
         configuration.setUsername(TEST_USERNAME);
         configuration.setPassword(TEST_PASSWORD);
         component = new FTPList();
-        component.setConfiguration(configuration);
+        component.setConnection(configuration);
     }
 
     @Override
