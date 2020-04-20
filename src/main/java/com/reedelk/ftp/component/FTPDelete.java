@@ -4,7 +4,6 @@ import com.reedelk.ftp.internal.Command;
 import com.reedelk.ftp.internal.CommandDeleteFile;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
-import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
@@ -21,6 +20,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.*;
+import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
+import static com.reedelk.ftp.internal.commons.Utils.classNameOrNull;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Delete")
@@ -58,18 +59,18 @@ public class FTPDelete implements ProcessorSync {
     public Message apply(FlowContext flowContext, Message message) {
 
         // We use the payload if the path is not given.
-        String remotePath;
+        String remotePath = connection.getWorkingDir();
         if (isNullOrBlank(path)) {
-            remotePath = pathFromPayloadOrThrow(message);
+            remotePath += pathFromPayloadOrThrow(message);
         } else {
-            remotePath = scriptEngine.evaluate(path, flowContext, message)
-                    .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path)));
+            remotePath += scriptEngine.evaluate(path, flowContext, message)
+                            .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path)));
         }
 
         Command<Boolean> command = new CommandDeleteFile(remotePath);
 
         boolean success = provider.execute(command, exceptionMapper);
-        if (!success)  {
+        if (!success) {
             throw new FTPDeleteException(NOT_SUCCESS.format(remotePath));
         }
 
@@ -91,7 +92,7 @@ public class FTPDelete implements ProcessorSync {
         if (content instanceof StringContent) {
             return ((StringContent) content).data();
         } else {
-            String error = TYPE_NOT_SUPPORTED.format(Utils.classNameOrNull(content));
+            String error = TYPE_NOT_SUPPORTED.format(classNameOrNull(content));
             throw new FTPDeleteException(error);
         }
     }

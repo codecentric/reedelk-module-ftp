@@ -1,9 +1,14 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.runtime.api.annotation.*;
+import com.reedelk.runtime.api.commons.StringUtils;
 import com.reedelk.runtime.api.component.Implementor;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
+
+import java.util.Optional;
+
+import static com.reedelk.ftp.internal.commons.Utils.FTP_PATH_SEPARATOR;
 
 @Shared
 @Component(service = ConnectionConfiguration.class, scope = ServiceScope.PROTOTYPE)
@@ -39,10 +44,10 @@ public class ConnectionConfiguration implements Implementor {
     private String password;
 
     @Property("Working Directory")
-    @Hint("assets")
-    @Example("assets")
+    @Hint("/documents")
+    @Example("/documents")
     @Description("The path to a directory that is treated as the root of every relative path used with this connector.")
-    private String workingDir; // TODO: Use me, right now is not used
+    private String workingDir;
 
     public ConnectionType getType() {
         return type;
@@ -85,7 +90,9 @@ public class ConnectionConfiguration implements Implementor {
     }
 
     public String getWorkingDir() {
-        return workingDir;
+        return Optional.ofNullable(workingDir)
+                .map(workingDirectory -> workingDirectory + FTP_PATH_SEPARATOR)
+                .orElse(StringUtils.EMPTY);
     }
 
     public void setWorkingDir(String workingDir) {

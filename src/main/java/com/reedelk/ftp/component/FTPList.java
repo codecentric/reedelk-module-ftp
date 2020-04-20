@@ -34,8 +34,6 @@ import static java.util.stream.Collectors.toList;
 @Component(service = FTPList.class, scope = ServiceScope.PROTOTYPE)
 public class FTPList implements ProcessorSync {
 
-    private static final String PATH_SEPARATOR = "/";
-
     @Property("Connection")
     @Description("FTP connection configuration to be used to list files from.")
     private ConnectionConfiguration connection;
@@ -87,9 +85,8 @@ public class FTPList implements ProcessorSync {
         // We use the payload if the path is not given.
         String finalListPath = connection.getWorkingDir();
         if (isNotNullOrBlank(path)) {
-            String remotePath = scriptEngine.evaluate(path, flowContext, message)
+            finalListPath += scriptEngine.evaluate(path, flowContext, message)
                     .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));
-            finalListPath += PATH_SEPARATOR + remotePath;
         }
 
         CommandList commandList = new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);

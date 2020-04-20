@@ -67,8 +67,9 @@ public class FTPStore implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String remotePath = scriptEngine.evaluate(path, flowContext, message)
-                .orElseThrow(() -> new FTPStoreException(PATH_EMPTY.format(path)));
+        String remotePath = connection.getWorkingDir() +
+                scriptEngine.evaluate(path, flowContext, message)
+                        .orElseThrow(() -> new FTPStoreException(PATH_EMPTY.format(path)));
 
         if (isNullOrBlank(content)) {
             // We must convert the payload to byte array because we have to upload

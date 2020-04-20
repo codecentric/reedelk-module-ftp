@@ -1,6 +1,8 @@
 package com.reedelk.ftp.internal;
 
 import com.reedelk.ftp.internal.commons.Default;
+import com.reedelk.ftp.internal.commons.Utils;
+import com.reedelk.runtime.api.commons.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -57,8 +59,8 @@ public class CommandList implements Command<List<FTPFile>> {
 
     List<FTPFile> listDirectory(FTPClient client, String parentDir, String currentDir, int level) throws IOException {
         String dirToList = parentDir;
-        if (!currentDir.equals("")) {
-            dirToList += "/" + currentDir;
+        if (!StringUtils.EMPTY.equals(currentDir)) {
+            dirToList += Utils.FTP_PATH_SEPARATOR + currentDir;
         }
         FTPFile[] subFiles = client.listFiles(dirToList);
         List<FTPFile> allFiles = new ArrayList<>();
