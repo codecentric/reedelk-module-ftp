@@ -101,7 +101,9 @@ public class ConnectionConfiguration implements Implementor {
 
     public String getWorkingDir() {
         return Optional.ofNullable(workingDir)
-                .map(workingDirectory -> workingDirectory + FTP_PATH_SEPARATOR)
+                .map(workingDirectory ->
+                        workingDirectory.endsWith(FTP_PATH_SEPARATOR) ?
+                                workingDirectory : workingDirectory + FTP_PATH_SEPARATOR)
                 .orElse(StringUtils.EMPTY);
     }
 
