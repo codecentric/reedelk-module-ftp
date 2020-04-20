@@ -12,6 +12,8 @@ import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,6 +141,25 @@ class FTPDeleteTest extends AbstractTest {
 
         boolean exists = getFileSystem().exists(path);
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPayloadIsNotStringType() {
+        // Given
+        List<String> notSupportedType = Collections.emptyList();
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .withJavaObject(notSupportedType)
+                .build();
+
+        // When
+        FTPDeleteException type =
+                assertThrows(FTPDeleteException.class, () -> component.apply(context, message));
+
+        // Then
+        assertThat(type).hasMessage("The component only support payload input with String type, " +
+                "however type=[com.reedelk.runtime.api.message.content.ListContent] was found.");
     }
 
     @Override
