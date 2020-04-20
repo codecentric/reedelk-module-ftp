@@ -3,6 +3,7 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.annotation.*;
@@ -22,7 +23,8 @@ import java.util.Map;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.ERROR_GENERIC;
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
-import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNotNullOrBlank;
+import static com.reedelk.ftp.internal.commons.Utils.joinPath;
+import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP List Files")
 @Description("The FTP List Files component allows to list all the files from a remote FTP server directory. " +
@@ -87,14 +89,19 @@ public class FTPList implements ProcessorSync {
     public Message apply(FlowContext flowContext, Message message) {
 
         // We use the payload if the path is not given.
-        String finalListPath = connection.getWorkingDir();
-        if (isNotNullOrBlank(path)) {
-            finalListPath += scriptEngine.evaluate(path, flowContext, message)
+        String remotePath;
+        if (isNullOrBlank(path)) {
+            String pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPListException::new);
+            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
+
+        } else {
+            String pathToAdd = scriptEngine.evaluate(path, flowContext, message)
                     .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));
+            remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
         }
 
         CommandList commandList =
-                new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
+                new CommandList(remotePath, recursive, filesOnly, directoriesOnly);
 
         List<Map> files = provider.execute(commandList, exceptionMapper);
 

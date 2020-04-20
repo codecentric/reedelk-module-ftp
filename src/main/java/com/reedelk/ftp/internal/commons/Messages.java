@@ -7,11 +7,26 @@ public class Messages {
     private Messages() {
     }
 
+    public enum Commons implements FormattedMessage {
+
+        TYPE_NOT_SUPPORTED("The component only support payload input with String type, however type=[%s] was found.");
+
+        private final String message;
+
+        Commons(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String template() {
+            return message;
+        }
+    }
+
     public enum FTPDelete implements FormattedMessage {
 
         ERROR_GENERIC("An error occurred while executing FTP delete operation, cause=[%s]"),
-        PATH_EMPTY("The path and name of the file to delete from the remote FTP server was null (DynamicValue=[%s])."),
-        TYPE_NOT_SUPPORTED("The component only support payload input with String type, however type=[%s] was found.");
+        PATH_EMPTY("The path and name of the file to delete from the remote FTP server was null (DynamicValue=[%s]).");
 
         private String message;
 

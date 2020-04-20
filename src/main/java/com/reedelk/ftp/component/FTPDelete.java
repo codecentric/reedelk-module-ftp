@@ -4,6 +4,7 @@ import com.reedelk.ftp.internal.Command;
 import com.reedelk.ftp.internal.CommandDeleteFile;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
@@ -11,16 +12,14 @@ import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
-import com.reedelk.runtime.api.message.content.StringContent;
-import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.*;
-import static com.reedelk.ftp.internal.commons.Utils.classNameOrNull;
+import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.ERROR_GENERIC;
+import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.PATH_EMPTY;
 import static com.reedelk.ftp.internal.commons.Utils.joinPath;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
@@ -68,7 +67,7 @@ public class FTPDelete implements ProcessorSync {
         // We use the payload if the path is not given.
         String remotePath;
         if (isNullOrBlank(path)) {
-            String pathToAdd = pathFromPayloadOrThrow(message);
+            String pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPDeleteException::new);
             remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
 
         } else {
@@ -92,16 +91,6 @@ public class FTPDelete implements ProcessorSync {
 
     public void setPath(DynamicString path) {
         this.path = path;
-    }
-
-    private String pathFromPayloadOrThrow(Message message) {
-        TypedContent<?, ?> content = message.content();
-        if (content instanceof StringContent) {
-            return ((StringContent) content).data();
-        } else {
-            String error = TYPE_NOT_SUPPORTED.format(classNameOrNull(content));
-            throw new FTPDeleteException(error);
-        }
     }
 
     private static class FTPDeleteExceptionMapper implements ExceptionMapper {

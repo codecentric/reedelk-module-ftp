@@ -4,7 +4,9 @@ import com.reedelk.runtime.api.exception.PlatformException;
 
 public interface ExceptionMapper {
 
-    PlatformException from(Exception exception);
+    default PlatformException from(Exception exception) {
+        throw new UnsupportedOperationException("Mapper does not support method");
+    }
 
     PlatformException from(String error);
 }
