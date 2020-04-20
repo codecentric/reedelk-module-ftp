@@ -1,11 +1,14 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.CommandList;
+import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.FTPFileMapper;
-import com.reedelk.ftp.internal.exception.FTPUploadException;
+import com.reedelk.ftp.internal.exception.FTPDeleteException;
+import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
+import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -19,6 +22,8 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.util.List;
 import java.util.Map;
 
+import static com.reedelk.ftp.internal.commons.Messages.FTPList.ERROR_GENERIC;
+import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNotNullOrBlank;
 import static java.util.stream.Collectors.toList;
 
@@ -28,6 +33,8 @@ import static java.util.stream.Collectors.toList;
         "working directory in the Connection configuration. The component allows to also only list files or directories.")
 @Component(service = FTPList.class, scope = ServiceScope.PROTOTYPE)
 public class FTPList implements ProcessorSync {
+
+    private static final String PATH_SEPARATOR = "/";
 
     @Property("Connection")
     @Description("FTP connection configuration to be used to list files from.")
@@ -65,28 +72,29 @@ public class FTPList implements ProcessorSync {
     ScriptEngineService scriptEngine;
 
     private FTPClientProvider provider;
+    private ExceptionMapper exceptionMapper;
 
     @Override
     public void initialize() {
         provider = new FTPClientProvider(FTPList.class, connection);
+        exceptionMapper = new FTPListExceptionMapper();
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-
         // We use the payload if the path is not given.
         String finalListPath = connection.getWorkingDir();
         if (isNotNullOrBlank(path)) {
             String remotePath = scriptEngine.evaluate(path, flowContext, message)
-                    .orElseThrow(() -> new FTPUploadException("File path was null"));
-            finalListPath += "/" + remotePath;
+                    .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));
+            finalListPath += PATH_SEPARATOR + remotePath;
         }
 
         CommandList commandList = new CommandList(finalListPath, recursive, filesOnly, directoriesOnly);
 
-        List<FTPFile> files = provider.execute(commandList);
+        List<FTPFile> files = provider.execute(commandList, exceptionMapper);
 
         List allFiles = files
                 .stream()
@@ -102,6 +110,10 @@ public class FTPList implements ProcessorSync {
         this.connection = connection;
     }
 
+    public void setDirectoriesOnly(Boolean directoriesOnly) {
+        this.directoriesOnly = directoriesOnly;
+    }
+
     public void setRecursive(Boolean recursive) {
         this.recursive = recursive;
     }
@@ -110,7 +122,18 @@ public class FTPList implements ProcessorSync {
         this.filesOnly = filesOnly;
     }
 
-    public void setDirectoriesOnly(Boolean directoriesOnly) {
-        this.directoriesOnly = directoriesOnly;
+    private static class FTPListExceptionMapper implements ExceptionMapper {
+
+        @Override
+        public PlatformException from(Exception exception) {
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            return new FTPListException(error, exception);
+        }
+
+        @Override
+        public PlatformException from(String error) {
+            String message = ERROR_GENERIC.format(error);
+            return new FTPDeleteException(message);
+        }
     }
 }

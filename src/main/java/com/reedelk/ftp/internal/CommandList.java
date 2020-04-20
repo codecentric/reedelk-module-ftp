@@ -27,7 +27,7 @@ public class CommandList implements Command<List<FTPFile>> {
     }
 
     @Override
-    public List<FTPFile> execute(FTPClient client) throws Exception {
+    public List<FTPFile> execute(FTPClient client) throws IOException {
 
         List<FTPFile> ftpFiles = recursive ?
                 listDirectory(client, path) :

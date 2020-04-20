@@ -1,12 +1,15 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.CommandRetrieve;
+import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPDownloadException;
+import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.ftp.internal.exception.FTPUploadException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
+import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -21,6 +24,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static com.reedelk.ftp.internal.commons.Messages.FTPRetrieve.ERROR_GENERIC;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Retrieve")
@@ -42,14 +46,17 @@ public class FTPRetrieve implements ProcessorSync {
             "If not present, the message payload is taken as path.")
     private DynamicString path;
 
-    private FTPClientProvider provider;
-
     @Reference
     ScriptEngineService scriptEngine;
+
+    private FTPClientProvider provider;
+    private ExceptionMapper exceptionMapper;
+
 
     @Override
     public void initialize() {
         provider = new FTPClientProvider(FTPRetrieve.class, connection);
+        exceptionMapper = new FTPRetrieveExceptionMapper();
     }
 
     @Override
@@ -71,7 +78,7 @@ public class FTPRetrieve implements ProcessorSync {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             CommandRetrieve command = new CommandRetrieve(remoteFileName, outputStream);
-            boolean success = provider.execute(command);
+            boolean success = provider.execute(command, exceptionMapper);
             if (!success)  {
                 throw new FTPDownloadException("Error could not be downloaded");
             }
@@ -92,5 +99,20 @@ public class FTPRetrieve implements ProcessorSync {
 
     public void setPath(DynamicString path) {
         this.path = path;
+    }
+
+    private static class FTPRetrieveExceptionMapper implements ExceptionMapper {
+
+        @Override
+        public PlatformException from(Exception exception) {
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            return new FTPListException(error, exception);
+        }
+
+        @Override
+        public PlatformException from(String error) {
+            String message = ERROR_GENERIC.format(error);
+            return new FTPDeleteException(message);
+        }
     }
 }

@@ -2,11 +2,13 @@ package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.Command;
 import com.reedelk.ftp.internal.CommandDeleteFile;
+import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
+import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -40,14 +42,16 @@ public class FTPDelete implements ProcessorSync {
             "If not present, the message payload is taken as path.")
     private DynamicString path;
 
-    private FTPClientProvider provider;
-
     @Reference
     ScriptEngineService scriptEngine;
+
+    private FTPClientProvider provider;
+    private ExceptionMapper exceptionMapper;
 
     @Override
     public void initialize() {
         provider = new FTPClientProvider(FTPDelete.class, connection);
+        exceptionMapper = new FTPDeleteExceptionMapper();
     }
 
     @Override
@@ -56,21 +60,15 @@ public class FTPDelete implements ProcessorSync {
         // We use the payload if the path is not given.
         String remotePath;
         if (isNullOrBlank(path)) {
-            TypedContent<?, ?> content = message.content();
-            if (content instanceof StringContent) {
-                remotePath = ((StringContent) content).data();
-            } else {
-                String error = TYPE_NOT_SUPPORTED.format(Utils.classNameOrNull(content));
-                throw new FTPDeleteException(error);
-            }
+            remotePath = pathFromPayloadOrThrow(message);
         } else {
             remotePath = scriptEngine.evaluate(path, flowContext, message)
-                    .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format()));
+                    .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path)));
         }
 
         Command<Boolean> command = new CommandDeleteFile(remotePath);
 
-        boolean success = provider.execute(command);
+        boolean success = provider.execute(command, exceptionMapper);
         if (!success)  {
             throw new FTPDeleteException(NOT_SUCCESS.format(remotePath));
         }
@@ -86,5 +84,30 @@ public class FTPDelete implements ProcessorSync {
 
     public void setPath(DynamicString path) {
         this.path = path;
+    }
+
+    private String pathFromPayloadOrThrow(Message message) {
+        TypedContent<?, ?> content = message.content();
+        if (content instanceof StringContent) {
+            return ((StringContent) content).data();
+        } else {
+            String error = TYPE_NOT_SUPPORTED.format(Utils.classNameOrNull(content));
+            throw new FTPDeleteException(error);
+        }
+    }
+
+    private static class FTPDeleteExceptionMapper implements ExceptionMapper {
+
+        @Override
+        public PlatformException from(Exception exception) {
+            String error = ERROR_GENERIC.format(exception.getMessage());
+            return new FTPDeleteException(error, exception);
+        }
+
+        @Override
+        public PlatformException from(String error) {
+            String message = ERROR_GENERIC.format(error);
+            return new FTPDeleteException(message);
+        }
     }
 }

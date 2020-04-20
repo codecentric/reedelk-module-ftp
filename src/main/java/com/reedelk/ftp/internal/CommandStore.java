@@ -2,6 +2,7 @@ package com.reedelk.ftp.internal;
 
 import org.apache.commons.net.ftp.FTPClient;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class CommandStore implements Command<Boolean> {
@@ -15,7 +16,7 @@ public class CommandStore implements Command<Boolean> {
     }
 
     @Override
-    public Boolean execute(FTPClient client) throws Exception {
+    public Boolean execute(FTPClient client) throws IOException {
         return client.storeFile(remoteFilePath, inputStream);
     }
 }
