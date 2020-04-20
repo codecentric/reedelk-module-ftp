@@ -38,7 +38,7 @@ public class FTPRetrieve implements ProcessorSync {
     @Property("Path")
     @Hint("/documents/my-document.pdf")
     @Example("/documents/my-document.pdf")
-    @Description("The path and name of the document to retrieve from the remote FTP server. " +
+    @Description("The path and name of the file to retrieve from the remote FTP server. " +
             "If not present, the message payload is taken as path.")
     private DynamicString path;
 

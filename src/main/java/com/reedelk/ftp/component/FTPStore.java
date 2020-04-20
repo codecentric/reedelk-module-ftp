@@ -39,7 +39,7 @@ public class FTPStore implements ProcessorSync {
     @Property("Path")
     @Hint("/documents/my-document.pdf")
     @Example("/documents/my-document.pdf")
-    @Description("The path and name of the document to store to the remote FTP server.")
+    @Description("The path and name of the file to store to the remote FTP server.")
     private DynamicString path;
 
     @Property("Content") // Comes from the body (payload)

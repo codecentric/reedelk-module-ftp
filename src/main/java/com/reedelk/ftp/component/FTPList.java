@@ -37,7 +37,7 @@ public class FTPList implements ProcessorSync {
     @DefaultValue("")
     @Hint("/documents")
     @Example("/documents")
-    @Description("The path in which files will be listed from the remote FTP server. " +
+    @Description("The path from which files will be listed from the remote FTP server. " +
             "The path can be a static or a dynamic value. " +
             "If both path and working directory from the connection configuration are present they are " +
             "appended to each other and the final path is computed as follow: /{WORKING_DIRECTORY}/{PATH}.")
