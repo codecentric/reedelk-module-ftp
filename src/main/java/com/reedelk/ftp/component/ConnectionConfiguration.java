@@ -9,6 +9,10 @@ import org.osgi.service.component.annotations.ServiceScope;
 @Component(service = ConnectionConfiguration.class, scope = ServiceScope.PROTOTYPE)
 public class ConnectionConfiguration implements Implementor {
 
+    @Property("Connection type")
+    @DefaultValue("FTP")
+    private ConnectionType type;
+
     @Property("FTP Host")
     @Hint("ftp.my.domain.com")
     @Example("ftp.my.domain.com")
@@ -39,6 +43,14 @@ public class ConnectionConfiguration implements Implementor {
     @Example("assets")
     @Description("The path to a directory that is treated as the root of every relative path used with this connector.")
     private String workingDir;
+
+    public ConnectionType getType() {
+        return type;
+    }
+
+    public void setType(ConnectionType type) {
+        this.type = type;
+    }
 
     public String getHost() {
         return host;
