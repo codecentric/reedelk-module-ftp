@@ -20,7 +20,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPDelete.*;
-import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.ftp.internal.commons.Utils.classNameOrNull;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
@@ -69,15 +68,12 @@ public class FTPDelete implements ProcessorSync {
             remotePath += pathFromPayloadOrThrow(message);
         } else {
             remotePath += scriptEngine.evaluate(path, flowContext, message)
-                            .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path)));
+                            .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path.value())));
         }
 
         Command<Boolean> command = new CommandDeleteFile(remotePath);
 
         boolean success = provider.execute(command, exceptionMapper);
-        if (!success) {
-            throw new FTPDeleteException(NOT_SUCCESS.format(remotePath));
-        }
 
         return MessageBuilder.get(FTPDelete.class)
                 .withJavaObject(success)

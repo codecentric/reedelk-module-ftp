@@ -10,8 +10,7 @@ public class Messages {
     public enum FTPDelete implements FormattedMessage {
 
         ERROR_GENERIC("An error occurred while executing FTP delete operation, cause=[%s]"),
-        NOT_SUCCESS("The file from path=[%s] could not be successfully deleted."),
-        PATH_EMPTY("The path and name of the file to delete from the remote FTP server was empty or null (DynamicValue=[%s])."),
+        PATH_EMPTY("The path and name of the file to delete from the remote FTP server was null (DynamicValue=[%s])."),
         TYPE_NOT_SUPPORTED("The component only support payload input with String type, however type=[%s] was found.");
 
         private String message;
@@ -29,7 +28,7 @@ public class Messages {
     public enum FTPList implements FormattedMessage {
 
         ERROR_GENERIC("An error occurred while executing FTP list operation, cause=[%s]"),
-        PATH_EMPTY("The path from which files will be listed from the remote FTP server was empty or null (DynamicValue=[%s]).");
+        PATH_EMPTY("The path from which files will be listed from the remote FTP server was null (DynamicValue=[%s]).");
 
         private final String message;
 
@@ -46,8 +45,7 @@ public class Messages {
     public enum FTPRetrieve implements FormattedMessage {
 
         ERROR_GENERIC("An error occurred while executing FTP Retrieve operation, cause=[%s]"),
-        NOT_SUCCESS("The file from path=[%s] could not be successfully retrieved."),
-        PATH_EMPTY("The path and name of the file to retrieve from the remote FTP server was empty or null (DynamicValue=[%s])."),
+        PATH_EMPTY("The path and name of the file to retrieve from the remote FTP server was null (DynamicValue=[%s])."),
         TYPE_NOT_SUPPORTED("The component only support payload input with String type, however type=[%s] was found.");
 
         private final String message;
@@ -66,7 +64,7 @@ public class Messages {
 
         ERROR_GENERIC("An error occurred while executing FTP Store operation, cause=[%s]"),
         NOT_SUCCESS("The file with path=[%s] could not be successfully stored."),
-        PATH_EMPTY("The path and name of the file to store to the remote FTP server was empty or null (DynamicValue=[%s])."),
+        PATH_EMPTY("The path and name of the file to store to the remote FTP server was null (DynamicValue=[%s])."),
         CONTENT_EMPTY("The data content of the file to store to the remote FTP server was empty or null (DynamicValue=[%s]).");
 
         private final String message;

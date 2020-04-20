@@ -70,21 +70,23 @@ public class FTPRetrieve implements ProcessorSync {
             remotePath += pathFromPayloadOrThrow(message);
         } else {
             remotePath += scriptEngine.evaluate(path, flowContext, message)
-                    .orElseThrow(() -> new FTPRetrieveException(PATH_EMPTY.format(path)));
+                    .orElseThrow(() -> new FTPRetrieveException(PATH_EMPTY.format(path.value())));
         }
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             CommandRetrieve command = new CommandRetrieve(remotePath, outputStream);
             boolean success = provider.execute(command, exceptionMapper);
-            if (!success)  {
-                throw new FTPRetrieveException(NOT_SUCCESS.format(remotePath));
+            if (success)  {
+                byte[] data = outputStream.toByteArray();
+                return MessageBuilder.get(FTPRetrieve.class)
+                        .withBinary(data)
+                        .build();
+            } else {
+                return MessageBuilder.get(FTPRetrieve.class)
+                        .empty()
+                        .build();
             }
-
-            byte[] data = outputStream.toByteArray();
-            return MessageBuilder.get(FTPRetrieve.class)
-                    .withBinary(data)
-                    .build();
 
         } catch (IOException exception) {
             String error = ERROR_GENERIC.format(exception.getMessage());
