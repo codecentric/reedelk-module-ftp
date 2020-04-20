@@ -33,6 +33,10 @@
     {
       "implementor": "com.reedelk.ftp.component.FTPStore",
       "description": "FTP Store"
+    },
+    {
+      "implementor": "com.reedelk.ftp.component.FTPDelete",
+      "description": "FTP Delete"
     }
   ]
 }

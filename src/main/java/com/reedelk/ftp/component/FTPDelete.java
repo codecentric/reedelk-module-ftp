@@ -60,7 +60,7 @@ public class FTPDelete implements ProcessorSync {
             if (content instanceof StringContent) {
                 remotePath = ((StringContent) content).data();
             } else {
-                String error = TYPE_NOT_SUPPORTED.format(Utils.getClassOrNull(content));
+                String error = TYPE_NOT_SUPPORTED.format(Utils.classNameOrNull(content));
                 throw new FTPDeleteException(error);
             }
         } else {
