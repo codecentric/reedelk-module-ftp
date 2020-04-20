@@ -59,7 +59,9 @@ public class FTPRetrieve implements ProcessorSync {
 
     @Override
     public void dispose() {
-        provider.dispose();
+        if (provider != null) {
+            provider.dispose();
+        }
     }
 
     @Override

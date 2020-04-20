@@ -80,7 +80,9 @@ public class FTPList implements ProcessorSync {
 
     @Override
     public void dispose() {
-        provider.dispose();
+        if (provider != null) {
+            provider.dispose();
+        }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
