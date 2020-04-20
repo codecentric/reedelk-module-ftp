@@ -19,23 +19,27 @@ import org.osgi.service.component.annotations.Reference;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
+@Description("The FTP delete component allows to store a file to a remote FTP server.")
 public class FTPStore implements ProcessorSync {
 
-    @Property("Connection Configuration")
-    private ConnectionConfiguration configuration;
+    @Property("Connection")
+    @Description("FTP connection configuration to be used to execute the store operation.")
+    private ConnectionConfiguration connection;
 
     @Property("Path")
     @Hint("/documents/my-document.pdf")
     @Example("/documents/my-document.pdf")
-    @Description("The path ")
+    @Description("The path and name of the document to store to the remote FTP server.")
     private DynamicString path;
 
     @Property("Content") // Comes from the body (payload)
     @DefaultValue("#[message.payload()]")
+    @Example("#[context.myContentVar")
+    @Description("The content of the file to store to the remote FTP server. " +
+            "If not present, the message payload is taken as content of the file.")
     private DynamicByteArray content;
 
     @Reference
@@ -47,31 +51,30 @@ public class FTPStore implements ProcessorSync {
 
     @Override
     public void initialize() {
-        requireNotNull(FTPStore.class, configuration, "Configuration");
-        provider = new FTPClientProvider(configuration);
+        provider = new FTPClientProvider(FTPStore.class, connection);
     }
 
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String uploadFileName = scriptEngine.evaluate(path, flowContext, message)
+        String remoteFilePath = scriptEngine.evaluate(path, flowContext, message)
                 .orElseThrow(() -> new FTPUploadException("File name was null"));
 
         if (isNullOrBlank(content)) {
             // We must convert the payload to byte array. Here should consider if it is a stream or not.
             Object payload = message.payload();
             byte[] data = converterService.convert(payload, byte[].class);
-            return upload(uploadFileName, data);
+            return upload(remoteFilePath, data);
 
         } else {
             byte[] evaluatedUploadData = scriptEngine.evaluate(content, flowContext, message)
                     .orElseThrow(() -> new FTPUploadException("Upload data was null")); // Should this one write an empty file?
-            return upload(uploadFileName, evaluatedUploadData);
+            return upload(remoteFilePath, evaluatedUploadData);
         }
     }
 
-    public void setConfiguration(ConnectionConfiguration configuration) {
-        this.configuration = configuration;
+    public void setConnection(ConnectionConfiguration connection) {
+        this.connection = connection;
     }
 
     public void setContent(DynamicByteArray content) {

@@ -4,9 +4,8 @@ import com.reedelk.ftp.internal.Command;
 import com.reedelk.ftp.internal.CommandDeleteFile;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
-import com.reedelk.runtime.api.annotation.Description;
-import com.reedelk.runtime.api.annotation.ModuleComponent;
-import com.reedelk.runtime.api.annotation.Property;
+import com.reedelk.ftp.internal.exception.FTPUploadException;
+import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
@@ -17,21 +16,22 @@ import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.osgi.service.component.annotations.Reference;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
+import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Delete")
-@Description("The FTP delete component allows to remove one or many files from a remote FTP server.")
+@Description("The FTP delete component allows to delete a file from a remote FTP server.")
 public class FTPDelete implements ProcessorSync {
 
     @Property("Connection")
-    @Description("FTP connection configuration to be used by this delete operation.")
-    private ConnectionConfiguration configuration;
+    @Description("FTP connection configuration to be used to execute the delete operation.")
+    private ConnectionConfiguration connection;
 
-    @Property("File name")
-    private DynamicString fileName;
+    @Property("Path")
+    @Hint("/documents/my-document.pdf")
+    @Example("/documents/my-document.pdf")
+    @Description("The path and name of the document to delete from the remote FTP server. " +
+            "If not present, the message payload is taken as path.")
+    private DynamicString path;
 
     private FTPClientProvider provider;
 
@@ -40,22 +40,28 @@ public class FTPDelete implements ProcessorSync {
 
     @Override
     public void initialize() {
-        requireNotNull(FTPList.class, configuration, "Configuration");
-        provider = new FTPClientProvider(configuration);
+        provider = new FTPClientProvider(FTPDelete.class, connection);
     }
 
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        TypedContent<?, ?> content = message.content();
-
-        Command<Boolean> command;
-        if (content instanceof StringContent) {
-            String remoteFileName = ((StringContent) content).data();
-            command = new CommandDeleteFile(remoteFileName);
+        // We use the payload if the path is not given.
+        String remoteFileName;
+        if (isNullOrBlank(path)) {
+            TypedContent<?, ?> content = message.content();
+            if (content instanceof StringContent) {
+                remoteFileName = ((StringContent) content).data();
+            } else {
+                throw new FTPDeleteException("Type not supported");
+            }
         } else {
-            throw new FTPDeleteException("Type not supported");
+            remoteFileName = scriptEngine.evaluate(path, flowContext, message)
+                    .orElseThrow(() -> new FTPUploadException("File name was null"));
+
         }
+
+        Command<Boolean> command = new CommandDeleteFile(remoteFileName);
 
         boolean success = provider.execute(command);
         if (!success)  {
@@ -67,7 +73,11 @@ public class FTPDelete implements ProcessorSync {
                 .build();
     }
 
-    public void setConfiguration(ConnectionConfiguration configuration) {
-        this.configuration = configuration;
+    public void setConnection(ConnectionConfiguration connection) {
+        this.connection = connection;
+    }
+
+    public void setPath(DynamicString path) {
+        this.path = path;
     }
 }

@@ -38,7 +38,7 @@ public class FTPStoreTest extends AbstractTest {
         component = new FTPStore();
         component.scriptEngine = scriptEngine;
         component.converterService = converterService;
-        component.setConfiguration(configuration);
+        component.setConnection(configuration);
     }
 
     @Test

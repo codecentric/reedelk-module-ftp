@@ -6,16 +6,16 @@ import java.io.InputStream;
 
 public class CommandStore implements Command<Boolean> {
 
-    private final String remoteFileName;
+    private final String remoteFilePath;
     private final InputStream inputStream;
 
-    public CommandStore(String remoteFileName, InputStream inputStream) {
-        this.remoteFileName = remoteFileName;
+    public CommandStore(String remoteFilePath, InputStream inputStream) {
+        this.remoteFilePath = remoteFilePath;
         this.inputStream = inputStream;
     }
 
     @Override
     public Boolean execute(FTPClient client) throws Exception {
-        return client.storeFile(remoteFileName, inputStream);
+        return client.storeFile(remoteFilePath, inputStream);
     }
 }

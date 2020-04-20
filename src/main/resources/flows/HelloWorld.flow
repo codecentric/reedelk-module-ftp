@@ -33,18 +33,6 @@
     {
       "implementor": "com.reedelk.ftp.component.FTPStore",
       "description": "FTP Store"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPList",
-      "description": "FTP List Files"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPRetrieve",
-      "description": "FTP Retrieve"
-    },
-    {
-      "implementor": "com.reedelk.ftp.component.FTPDelete",
-      "description": "FTP Delete"
     }
   ]
 }

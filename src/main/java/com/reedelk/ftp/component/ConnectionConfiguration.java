@@ -42,7 +42,7 @@ public class ConnectionConfiguration implements Implementor {
     @Hint("assets")
     @Example("assets")
     @Description("The path to a directory that is treated as the root of every relative path used with this connector.")
-    private String workingDir;
+    private String workingDir; // TODO: Use me, right now is not used
 
     public ConnectionType getType() {
         return type;

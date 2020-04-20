@@ -1,11 +1,17 @@
 package com.reedelk.ftp.internal;
 
 import com.reedelk.ftp.component.ConnectionConfiguration;
+import com.reedelk.ftp.internal.commons.Default;
+import com.reedelk.runtime.api.component.Implementor;
 import com.reedelk.runtime.api.exception.PlatformException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import java.io.IOException;
+
+import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotBlank;
+import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
+import static java.util.Optional.ofNullable;
 
 public class FTPClientProvider {
 
@@ -16,13 +22,17 @@ public class FTPClientProvider {
 
     private FTPClient ftp;
 
-    // TODO: Argument Checking
-    public FTPClientProvider(ConnectionConfiguration configuration) {
-        port = configuration.getPort();
-        host = configuration.getHost();
-        username = configuration.getUsername();
-        password = configuration.getPassword();
-        ftp = new FTPClient(); // Maybe init only once?
+    public FTPClientProvider(Class<? extends Implementor> implementor, ConnectionConfiguration connection) {
+        requireNotNull(implementor, connection, "FTP Connection Configuration must be provided.");
+        requireNotBlank(implementor, connection.getHost(), "FTP Connection host must not be empty.");
+        requireNotBlank(implementor, connection.getUsername(), "FTP Connection username must not be empty.");
+        requireNotBlank(implementor, connection.getPassword(), "FTP Connection password must not be empty.");
+
+        port = ofNullable(connection.getPort()).orElse(Default.FTP_PORT);
+        host = connection.getHost();
+        username = connection.getUsername();
+        password = connection.getPassword();
+        ftp = new FTPClient();
     }
 
     public <T> T execute(Command<T> command) {
