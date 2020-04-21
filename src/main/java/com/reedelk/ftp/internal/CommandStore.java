@@ -1,5 +1,6 @@
 package com.reedelk.ftp.internal;
 
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class CommandStore implements Command<Boolean> {
 
     @Override
     public Boolean execute(FTPClient client) throws IOException {
+        client.setFileType(FTP.BINARY_FILE_TYPE);
         return client.storeFile(remoteFilePath, inputStream);
     }
 }
