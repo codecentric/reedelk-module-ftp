@@ -22,7 +22,6 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.ftp.internal.commons.Messages.FTPStore.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
@@ -107,18 +106,22 @@ public class FTPStore implements ProcessorSync {
     }
 
     private Message upload(String remotePath, byte[] data) {
+        // We upload an empty file if the payload is empty.
+        if (data == null) data = new byte[0];
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
 
             CommandStore command = new CommandStore(remotePath, inputStream);
             boolean success = provider.execute(command, exceptionMapper);
-            if (!success) {
-                throw new FTPStoreException(NOT_SUCCESS.format(remotePath));
+            if (success) {
+                return MessageBuilder.get(FTPStore.class)
+                        .withJavaObject(true)
+                        .build();
+            } else {
+                return MessageBuilder.get(FTPStore.class)
+                        .withJavaObject(false)
+                        .build();
             }
-
-            return MessageBuilder.get(FTPRetrieve.class)
-                    .withJavaObject(true)
-                    .build();
         } catch (IOException exception) {
             String error = ERROR_GENERIC.format(exception.getMessage());
             throw new FTPStoreException(error, exception);
