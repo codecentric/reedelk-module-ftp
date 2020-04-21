@@ -1,6 +1,5 @@
 package com.reedelk.ftp.internal;
 
-import com.reedelk.runtime.api.commons.StringUtils;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.Serializable;

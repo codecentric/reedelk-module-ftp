@@ -31,6 +31,11 @@
       "description": "FTP Delete",
       "connection": {"ref": "4a47934f-309a-4173-a420-26dca9f3a5b7"},
       "path": "#[context.fileName]"
+    },
+    {
+      "implementor": "com.reedelk.core.component.PayloadToString",
+      "description": "Payload To String",
+      "mimeType": "text/plain"
     }
   ]
 }

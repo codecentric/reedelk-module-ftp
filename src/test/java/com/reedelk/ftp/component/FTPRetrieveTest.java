@@ -1,9 +1,6 @@
 package com.reedelk.ftp.component;
 
-import com.reedelk.ftp.internal.exception.FTPDeleteException;
-import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.ftp.internal.exception.FTPRetrieveException;
-import com.reedelk.ftp.internal.exception.FTPStoreException;
 import com.reedelk.runtime.api.commons.ModuleContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -11,7 +8,6 @@ import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;

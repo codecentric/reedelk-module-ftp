@@ -1,7 +1,6 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
-import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.commons.ModuleContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;

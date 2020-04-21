@@ -1,7 +1,7 @@
 package com.reedelk.ftp.component;
 
-import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPListException;
+import com.reedelk.runtime.api.converter.ConverterService;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
+import org.mockito.Mock;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -19,17 +20,22 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 
 
 class FTPListTest extends AbstractTest {
 
     private FTPList component;
 
+    @Mock
+    private ConverterService converterService;
+
     @BeforeEach
     void setUp() {
         super.setUp();
         component = new FTPList();
         component.scriptEngine = scriptEngine;
+        component.converterService = converterService;
         component.setConnection(connection);
     }
 
@@ -215,6 +221,9 @@ class FTPListTest extends AbstractTest {
                 .withText(path)
                 .build();
 
+        doReturn(path).when(converterService)
+                .convert(path, String.class);
+
         // When
         Message actual = component.apply(context, message);
 
@@ -228,7 +237,7 @@ class FTPListTest extends AbstractTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenPayloadIsNotStringType() {
+    void shouldReturnEmptyWhenPayloadNotStringType() {
         // Given
         List<String> notSupportedType = Collections.emptyList();
         component.initialize();
@@ -237,13 +246,16 @@ class FTPListTest extends AbstractTest {
                 .withJavaObject(notSupportedType)
                 .build();
 
+        doReturn(notSupportedType.toString())
+                .when(converterService)
+                .convert(notSupportedType, String.class);
+
         // When
-        FTPListException type =
-                assertThrows(FTPListException.class, () -> component.apply(context, message));
+        Message actual = component.apply(context, message);
 
         // Then
-        assertThat(type).hasMessage("The component only support payload input with String type, " +
-                "however type=[com.reedelk.runtime.api.message.content.ListContent] was found.");
+        List<Map> results = actual.payload();
+        assertThat(results).isEmpty();
     }
 
     @Test

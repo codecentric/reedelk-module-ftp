@@ -1,6 +1,5 @@
 package com.reedelk.ftp.component;
 
-import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPStoreException;
 import com.reedelk.runtime.api.commons.ByteArrayUtils;
 import com.reedelk.runtime.api.converter.ConverterService;

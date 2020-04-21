@@ -6,7 +6,6 @@ import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.annotation.*;
-import com.reedelk.runtime.api.commons.FileUtils;
 import com.reedelk.runtime.api.commons.MimeTypeUtils;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.exception.PlatformException;
