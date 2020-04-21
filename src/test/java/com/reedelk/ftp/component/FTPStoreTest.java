@@ -12,14 +12,12 @@ import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 import org.mockftpserver.fake.filesystem.FileSystemEntry;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 public class FTPStoreTest extends AbstractTest {
 
@@ -38,9 +36,9 @@ public class FTPStoreTest extends AbstractTest {
     }
 
     @Test
-    void shouldCorrectlyUploadTextData() throws IOException {
+    void shouldCorrectlyStoreTextDataFromPayload() throws IOException {
         // Given
-        component.setPath(DynamicString.from("/myFile.txt"));
+        component.setPath(DynamicString.from("/data/myFile.txt"));
         component.initialize();
         String textData = "My data";
 
@@ -59,7 +57,7 @@ public class FTPStoreTest extends AbstractTest {
         assertThat(actual).isNotNull();
 
         FileSystem fileSystem = getFileSystem();
-        FileSystemEntry entry = fileSystem.getEntry("/myFile.txt");
+        FileSystemEntry entry = fileSystem.getEntry("/data/myFile.txt");
         assertThat(entry).isNotNull();
         assertThat(entry.getName()).isEqualTo("myFile.txt");
 
@@ -68,9 +66,9 @@ public class FTPStoreTest extends AbstractTest {
     }
 
     @Test
-    void shouldCorrectlyUploadByteArrayData() throws IOException {
+    void shouldCorrectlyStoreByteArrayDataFromPayload() throws IOException {
         // Given
-        component.setPath(DynamicString.from("/myFile.txt"));
+        component.setPath(DynamicString.from("/data/myFile.txt"));
         component.initialize();
         byte[] dataAsBytes = "one".getBytes();
 
@@ -84,15 +82,42 @@ public class FTPStoreTest extends AbstractTest {
         Message actual = component.apply(context, message);
 
         // Then
-        assertThat(actual).isNotNull();
+        boolean success = actual.payload();
+        assertThat(success).isTrue();
+        assertExistFileEntryWith("/data/myFile.txt", "myFile.txt", new String(dataAsBytes));
+    }
 
-        FileSystem fileSystem = getFileSystem();
-        FileSystemEntry entry = fileSystem.getEntry("/myFile.txt");
-        assertThat(entry).isNotNull();
-        assertThat(entry.getName()).isEqualTo("myFile.txt");
+    @Test
+    void shouldStoreFileByConcatenatingPathWithWorkingDirectory() throws IOException {
+        // Given
+        ConnectionConfiguration connection = new ConnectionConfiguration();
+        connection.setPort(getServerPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setWorkingDir("/data");
+        connection.setUsername(TEST_USERNAME);
+        connection.setPassword(TEST_PASSWORD);
 
-        FileEntry myFile = (FileEntry) entry;
-        assertFileEntryContentIs(myFile, new String(dataAsBytes));
+        String path = "/foobar.txt";
+        component.setPath(DynamicString.from(path));
+        component.setConnection(connection);
+        component.initialize();
+
+        byte[] dataAsBytes = "one".getBytes();
+
+        doReturn(dataAsBytes).when(converterService).convert(dataAsBytes, byte[].class);
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .withBinary(dataAsBytes)
+                .build();
+
+        // When
+        Message actual = component.apply(context, message);
+
+        // Then
+        boolean success = actual.payload();
+        assertThat(success).isTrue();
+        assertExistFileEntryWith("/data/foobar.txt", "foobar.txt", new String(dataAsBytes));
     }
 
     @Override
@@ -102,8 +127,19 @@ public class FTPStoreTest extends AbstractTest {
 
     @Override
     protected void clean(FileSystem fileSystem) {
+        fileSystem.delete("/data/myFile.txt");
         fileSystem.delete("/data/foobar.txt");
         fileSystem.delete("/data");
+    }
+
+    private void assertExistFileEntryWith(String path, String entryName, String content) throws IOException {
+        FileSystem fileSystem = getFileSystem();
+        FileSystemEntry entry = fileSystem.getEntry(path);
+        assertThat(entry).isNotNull();
+        assertThat(entry.getName()).isEqualTo(entryName);
+
+        FileEntry myFile = (FileEntry) entry;
+        assertFileEntryContentIs(myFile, content);
     }
 
     private void assertFileEntryContentIs(FileEntry myFile, String expectedContent) throws IOException {
