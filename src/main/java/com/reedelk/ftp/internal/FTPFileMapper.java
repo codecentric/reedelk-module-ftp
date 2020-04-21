@@ -1,5 +1,6 @@
 package com.reedelk.ftp.internal;
 
+import com.reedelk.runtime.api.commons.StringUtils;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.Serializable;
@@ -60,4 +61,11 @@ public class FTPFileMapper implements Function<FTPFileWithPath, Map<String, Seri
 
     public static final Predicate<Map<String, Serializable>> DIRECTORIES_ONLY =
             map -> (boolean) map.get(PROPERTY_IS_DIRECTORY);
+
+    // Exclude current and parent directories.
+    public static final Predicate<Map<String, Serializable>> CURRENT_DIRECTORY =
+            map -> !".".equals(map.get("name"));
+
+    public static final Predicate<Map<String, Serializable>> PARENT_DIRECTORY =
+            map -> !"..".equals(map.get("name"));
 }

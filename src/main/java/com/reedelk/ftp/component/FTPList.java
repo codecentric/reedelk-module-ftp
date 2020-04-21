@@ -7,10 +7,12 @@ import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
+import com.reedelk.runtime.api.converter.ConverterService;
 import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
+import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import org.osgi.service.component.annotations.Component;
@@ -65,6 +67,8 @@ public class FTPList implements ProcessorSync {
 
     @Reference
     ScriptEngineService scriptEngine;
+    @Reference
+    ConverterService converterService;
 
     private FTPClientProvider provider;
     private ExceptionMapper exceptionMapper;
@@ -86,10 +90,11 @@ public class FTPList implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        // We use the payload if the path is not given.
         String pathToAdd;
         if (isNullOrBlank(path)) {
-            pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPListException::new);
+            // We take the path from the payload if the path is not given.
+            Object content = message.payload();
+            pathToAdd = converterService.convert(content, String.class);
         } else {
             pathToAdd = scriptEngine.evaluate(path, flowContext, message)
                     .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));

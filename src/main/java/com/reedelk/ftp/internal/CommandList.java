@@ -99,6 +99,8 @@ public class CommandList implements Command<List<Map>> {
         List<Predicate<Map<String, Serializable>>> allPredicates = new ArrayList<>();
         if (filesOnly) allPredicates.add(FTPFileMapper.FILES_ONLY);
         if (directoriesOnly) allPredicates.add(FTPFileMapper.DIRECTORIES_ONLY);
+        allPredicates.add(FTPFileMapper.CURRENT_DIRECTORY);
+        allPredicates.add(FTPFileMapper.PARENT_DIRECTORY);
         return allPredicates;
     }
 }
