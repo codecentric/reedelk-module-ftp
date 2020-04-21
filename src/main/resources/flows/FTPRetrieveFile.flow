@@ -12,8 +12,7 @@
       "streaming": "AUTO",
       "response": {
         "body": "#[message.payload()]",
-        "status": 200,
-        "headers": {"content-type": "#['image/jpeg']"}
+        "status": 200
       },
       "errorResponse": {
         "body": "#[error]",
@@ -37,7 +36,8 @@
       "implementor": "com.reedelk.ftp.component.FTPRetrieve",
       "description": "FTP Retrieve",
       "connection": {"ref": "4a47934f-309a-4173-a420-26dca9f3a5b7"},
-      "path": "#[context.fileName]"
+      "path": "#[context.fileName]",
+      "autoMimeType": true
     }
   ]
 }

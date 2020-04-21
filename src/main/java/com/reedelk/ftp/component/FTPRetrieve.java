@@ -6,11 +6,14 @@ import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.annotation.*;
+import com.reedelk.runtime.api.commons.FileUtils;
+import com.reedelk.runtime.api.commons.MimeTypeUtils;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.exception.PlatformException;
 import com.reedelk.runtime.api.flow.FlowContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
+import com.reedelk.runtime.api.message.content.MimeType;
 import com.reedelk.runtime.api.message.content.StringContent;
 import com.reedelk.runtime.api.message.content.TypedContent;
 import com.reedelk.runtime.api.script.ScriptEngineService;
@@ -43,6 +46,22 @@ public class FTPRetrieve implements ProcessorSync {
     @Description("The path and name of the file to retrieve from the remote FTP server. " +
             "If not present, the message payload is taken as path.")
     private DynamicString path;
+
+    @Property("Auto mime type")
+    @Example("true")
+    @InitValue("true")
+    @DefaultValue("false")
+    @Description("If true, the mime type of the retrieved file is determined from the file extension.")
+    private boolean autoMimeType;
+
+    @Property("Mime type")
+    @MimeTypeCombo
+    @Example(MimeType.AsString.IMAGE_JPEG)
+    @DefaultValue(MimeType.AsString.APPLICATION_BINARY)
+    @When(propertyName = "autoMimeType", propertyValue = "false")
+    @When(propertyName = "autoMimeType", propertyValue = When.BLANK)
+    @Description("The mime type of the file retrieved from the remote FTP server.")
+    private String mimeType;
 
     @Reference
     ScriptEngineService scriptEngine;
@@ -81,10 +100,14 @@ public class FTPRetrieve implements ProcessorSync {
 
             CommandRetrieve command = new CommandRetrieve(remotePath, outputStream);
             boolean success = provider.execute(command, exceptionMapper);
+
             if (success)  {
+
+                MimeType mimeType = MimeTypeUtils.mimeTypeFrom(autoMimeType, this.mimeType, remotePath, MimeType.APPLICATION_BINARY);
+
                 byte[] data = outputStream.toByteArray();
                 return MessageBuilder.get(FTPRetrieve.class)
-                        .withBinary(data)
+                        .withBinary(data, mimeType)
                         .build();
             }
             String error = ERROR_NOT_SUCCESS.format(remotePath);
@@ -102,6 +125,14 @@ public class FTPRetrieve implements ProcessorSync {
 
     public void setPath(DynamicString path) {
         this.path = path;
+    }
+
+    public void setAutoMimeType(boolean autoMimeType) {
+        this.autoMimeType = autoMimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
     private String pathFromPayloadOrThrow(Message message) {
