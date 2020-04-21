@@ -25,7 +25,7 @@ public class Messages {
 
     public enum FTPDelete implements FormattedMessage {
 
-        ERROR_GENERIC("An error occurred while executing FTP delete operation, cause=[%s]"),
+        ERROR_GENERIC("An error occurred while executing FTP Delete operation, cause=[%s]"),
         PATH_EMPTY("The path and name of the file to delete from the remote FTP server was null (DynamicValue=[%s]).");
 
         private String message;
@@ -42,7 +42,7 @@ public class Messages {
 
     public enum FTPList implements FormattedMessage {
 
-        ERROR_GENERIC("An error occurred while executing FTP list operation, cause=[%s]"),
+        ERROR_GENERIC("An error occurred while executing FTP List operation, cause=[%s]"),
         PATH_EMPTY("The path from which files will be listed from the remote FTP server was null (DynamicValue=[%s]).");
 
         private final String message;

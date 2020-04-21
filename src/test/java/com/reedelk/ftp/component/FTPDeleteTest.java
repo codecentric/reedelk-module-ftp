@@ -1,6 +1,7 @@
 package com.reedelk.ftp.component;
 
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
+import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.commons.ModuleContext;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
@@ -162,6 +163,35 @@ class FTPDeleteTest extends AbstractTest {
         // Then
         assertThat(type).hasMessage("The component only support payload input with String type, " +
                 "however type=[com.reedelk.runtime.api.message.content.ListContent] was found.");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConnectionParametersAreNotCorrect() {
+        // Given
+        ConnectionConfiguration connection = new ConnectionConfiguration();
+        connection.setPort(getServerPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setWorkingDir("/data");
+        connection.setUsername("wrongUsername");
+        connection.setPassword("wrongPassword");
+
+        String path = "/foobar.txt";
+        component.setPath(DynamicString.from(path));
+        component.setConnection(connection);
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .empty()
+                .build();
+
+        // When
+        FTPDeleteException type =
+                assertThrows(FTPDeleteException.class, () -> component.apply(context, message));
+
+        // Then
+        assertThat(type).hasMessage("An error occurred while executing FTP Delete operation, " +
+                "cause=[Could not login! Username and password wrong?]");
     }
 
     @Override

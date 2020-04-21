@@ -271,7 +271,7 @@ class FTPListTest extends AbstractTest {
                 assertThrows(FTPListException.class, () -> component.apply(context, message));
 
         // Then
-        assertThat(type).hasMessage("An error occurred while executing FTP list operation, " +
+        assertThat(type).hasMessage("An error occurred while executing FTP List operation, " +
                 "cause=[Could not login! Username and password wrong?]");
     }
 
