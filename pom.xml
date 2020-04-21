@@ -11,10 +11,9 @@
         <version>0.9.1-SNAPSHOT</version>
     </parent>
 
+    <packaging>bundle</packaging>
     <version>0.9.1-SNAPHSOT</version>
     <artifactId>module-ftp</artifactId>
-
-    <packaging>bundle</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,40 +26,7 @@
         <junit.version>5.5.2</junit.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>reedelk-repository</id>
-            <name>Reedelk Repository</name>
-            <url>https://www.reedelk.com/maven/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>reedelk-plugin-repository</id>
-            <name>Reedelk Plugin Repository</name>
-            <url>https://www.reedelk.com/maven/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <dependencies>
-        <dependency>
-            <groupId>com.reedelk</groupId>
-            <artifactId>module-core</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.reedelk</groupId>
-            <artifactId>module-rest</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.reedelk</groupId>
-            <artifactId>module-json</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
