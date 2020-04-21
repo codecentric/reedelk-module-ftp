@@ -3,6 +3,7 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandStore;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPStoreException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
@@ -21,6 +22,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.ftp.internal.commons.Messages.FTPStore.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
@@ -74,9 +76,9 @@ public class FTPStore implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String remotePath = connection.getWorkingDir() +
-                scriptEngine.evaluate(path, flowContext, message)
-                        .orElseThrow(() -> new FTPStoreException(PATH_EMPTY.format(path.value())));
+        String pathToStore = scriptEngine.evaluate(path, flowContext, message)
+                .orElseThrow(() -> new FTPStoreException(PATH_EMPTY.format(path.value())));
+        String remotePath = Utils.joinPath(connection.getWorkingDir(), pathToStore);
 
         if (isNullOrBlank(content)) {
             // We must convert the payload to byte array because we have to upload

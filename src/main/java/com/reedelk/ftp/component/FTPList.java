@@ -22,7 +22,6 @@ import java.util.Map;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.ERROR_GENERIC;
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
-import static com.reedelk.ftp.internal.commons.Utils.joinPath;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP List Files")
@@ -88,16 +87,15 @@ public class FTPList implements ProcessorSync {
     public Message apply(FlowContext flowContext, Message message) {
 
         // We use the payload if the path is not given.
-        String remotePath;
+        String pathToAdd;
         if (isNullOrBlank(path)) {
-            String pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPListException::new);
-            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
-
+            pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPListException::new);
         } else {
-            String pathToAdd = scriptEngine.evaluate(path, flowContext, message)
+            pathToAdd = scriptEngine.evaluate(path, flowContext, message)
                     .orElseThrow(() -> new FTPListException(PATH_EMPTY.format(path)));
-            remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
         }
+
+        String remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
 
         CommandList commandList =
                 new CommandList(remotePath, recursive, filesOnly, directoriesOnly);

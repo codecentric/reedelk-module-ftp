@@ -65,16 +65,15 @@ public class FTPDelete implements ProcessorSync {
     public Message apply(FlowContext flowContext, Message message) {
 
         // We use the payload if the path is not given.
-        String remotePath;
+        String pathToDelete;
         if (isNullOrBlank(path)) {
-            String pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPDeleteException::new);
-            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
-
+            pathToDelete = Utils.pathFromPayloadOrThrow(message, FTPDeleteException::new);
         } else {
-            String pathToAdd = scriptEngine.evaluate(path, flowContext, message)
+            pathToDelete = scriptEngine.evaluate(path, flowContext, message)
                             .orElseThrow(() -> new FTPDeleteException(PATH_EMPTY.format(path.value())));
-            remotePath = joinPath(connection.getWorkingDir(), pathToAdd);
         }
+
+        String remotePath = joinPath(connection.getWorkingDir(), pathToDelete);
 
         Command<Boolean> command = new CommandDeleteFile(remotePath);
 

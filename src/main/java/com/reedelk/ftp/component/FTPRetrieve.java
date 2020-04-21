@@ -67,15 +67,15 @@ public class FTPRetrieve implements ProcessorSync {
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
-        String remotePath;
+        String pathToAdd;
         if (isNullOrBlank(path)) {
-            String pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPRetrieveException::new);
-            remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
+            pathToAdd = Utils.pathFromPayloadOrThrow(message, FTPRetrieveException::new);
         } else {
-            String pathToAdd = scriptEngine.evaluate(path, flowContext, message)
+            pathToAdd = scriptEngine.evaluate(path, flowContext, message)
                     .orElseThrow(() -> new FTPRetrieveException(PATH_EMPTY.format(path.value())));
-            remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
         }
+
+        String remotePath = Utils.joinPath(connection.getWorkingDir(), pathToAdd);
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
