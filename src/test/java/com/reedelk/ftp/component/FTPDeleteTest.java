@@ -130,7 +130,9 @@ class FTPDeleteTest extends AbstractTest {
         String path = "/data/foobar.txt";
         component.initialize();
 
-        Message message = MessageBuilder.get(TestComponent.class).withText(path).build();
+        Message message = MessageBuilder.get(TestComponent.class)
+                .withText(path)
+                .build();
 
         // When
         Message actual = component.apply(context, message);

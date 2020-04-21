@@ -1,5 +1,7 @@
 package com.reedelk.ftp.component;
 
+import com.reedelk.ftp.internal.exception.FTPDeleteException;
+import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.message.Message;
 import com.reedelk.runtime.api.message.MessageBuilder;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
@@ -10,11 +12,13 @@ import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 class FTPListTest extends AbstractTest {
@@ -199,6 +203,76 @@ class FTPListTest extends AbstractTest {
         assertContainsFileWithName(payload, "company", "/data/documents");
         assertContainsFileWithName(payload, "document1.txt", "/data/documents");
         assertContainsFileWithName(payload, "document2.txt", "/data/documents");
+    }
+
+    @Test
+    void shouldTakePathFromPayloadWhenPathPropertyIsNull() {
+        // Given
+        String path = "/data/documents";
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .withText(path)
+                .build();
+
+        // When
+        Message actual = component.apply(context, message);
+
+        // Then
+        List<Map<String, Serializable>> payload = actual.payload();
+        assertThat(payload).hasSize(3);
+
+        assertContainsFileWithName(payload, "company", "/data/documents");
+        assertContainsFileWithName(payload, "document1.txt", "/data/documents");
+        assertContainsFileWithName(payload, "document2.txt", "/data/documents");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPayloadIsNotStringType() {
+        // Given
+        List<String> notSupportedType = Collections.emptyList();
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .withJavaObject(notSupportedType)
+                .build();
+
+        // When
+        FTPListException type =
+                assertThrows(FTPListException.class, () -> component.apply(context, message));
+
+        // Then
+        assertThat(type).hasMessage("The component only support payload input with String type, " +
+                "however type=[com.reedelk.runtime.api.message.content.ListContent] was found.");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConnectionParametersAreNotCorrect() {
+        // Given
+        ConnectionConfiguration connection = new ConnectionConfiguration();
+        connection.setPort(getServerPort());
+        connection.setType(ConnectionType.FTP);
+        connection.setHost(TEST_HOST);
+        connection.setWorkingDir("/data");
+        connection.setUsername("wrongUsername");
+        connection.setPassword("wrongPassword");
+
+        String path = "/documents";
+        component.setPath(DynamicString.from(path));
+        component.setConnection(connection);
+        component.initialize();
+
+        Message message = MessageBuilder.get(TestComponent.class)
+                .empty()
+                .build();
+
+        // When
+        FTPListException type =
+                assertThrows(FTPListException.class, () -> component.apply(context, message));
+
+        // Then
+        assertThat(type).hasMessage("An error occurred while executing FTP list operation, " +
+                "cause=[Could not login! Username and password wrong?]");
     }
 
     @Override

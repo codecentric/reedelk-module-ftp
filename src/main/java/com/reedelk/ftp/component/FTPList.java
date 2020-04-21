@@ -4,7 +4,6 @@ import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
 import com.reedelk.ftp.internal.commons.Utils;
-import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.ftp.internal.exception.FTPListException;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
@@ -141,7 +140,7 @@ public class FTPList implements ProcessorSync {
         @Override
         public PlatformException from(String error) {
             String message = ERROR_GENERIC.format(error);
-            return new FTPDeleteException(message);
+            return new FTPListException(message);
         }
     }
 }
