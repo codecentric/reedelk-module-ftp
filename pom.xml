@@ -11,7 +11,6 @@
         <version>0.9.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.reedelk.ftp</groupId>
     <version>0.9.1-SNAPHSOT</version>
     <artifactId>module-ftp</artifactId>
 
