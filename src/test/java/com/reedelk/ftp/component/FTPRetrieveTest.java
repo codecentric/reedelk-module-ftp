@@ -11,6 +11,7 @@ import com.reedelk.runtime.api.script.dynamicvalue.DynamicString;
 import com.reedelk.runtime.api.script.dynamicvalue.DynamicValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockftpserver.fake.filesystem.DirectoryEntry;
 import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
@@ -56,7 +57,7 @@ public class FTPRetrieveTest extends AbstractTest {
     }
 
     @Test
-    void shouldReturnNullWhenFileToRetrieveDoesNotExists() {
+    void shouldThrowExceptionWhenFileToRetrieveDoesNotExists() {
         // Given
         component.setPath(DynamicString.from("/data/foobar_not_existent.txt"));
         component.initialize();
@@ -66,11 +67,13 @@ public class FTPRetrieveTest extends AbstractTest {
                 .build();
 
         // When
-        Message actual = component.apply(context, message);
+        FTPRetrieveException thrown = assertThrows(FTPRetrieveException.class,
+                () -> component.apply(context, message));
 
         // Then
-        byte[] data = actual.payload();
-        assertThat(data).isNull();
+        assertThat(thrown)
+                .hasMessage("The file from path=[/data/foobar_not_existent.txt] " +
+                        "could not be successfully retrieved. Please make sure that it exists on the remote FTP server.");
     }
 
     @Test

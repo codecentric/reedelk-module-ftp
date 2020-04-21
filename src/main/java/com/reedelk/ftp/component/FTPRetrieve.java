@@ -86,11 +86,9 @@ public class FTPRetrieve implements ProcessorSync {
                 return MessageBuilder.get(FTPRetrieve.class)
                         .withBinary(data)
                         .build();
-            } else {
-                return MessageBuilder.get(FTPRetrieve.class)
-                        .empty()
-                        .build();
             }
+            String error = ERROR_NOT_SUCCESS.format(remotePath);
+            throw new FTPRetrieveException(error);
 
         } catch (IOException exception) {
             String error = ERROR_GENERIC.format(exception.getMessage());

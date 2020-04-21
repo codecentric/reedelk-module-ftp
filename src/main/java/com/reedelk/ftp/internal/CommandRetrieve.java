@@ -1,5 +1,6 @@
 package com.reedelk.ftp.internal;
 
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.IOException;

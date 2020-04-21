@@ -59,6 +59,7 @@ public class Messages {
 
     public enum FTPRetrieve implements FormattedMessage {
 
+        ERROR_NOT_SUCCESS("The file from path=[%s] could not be successfully retrieved. Please make sure that it exists on the remote FTP server."),
         ERROR_GENERIC("An error occurred while executing FTP Retrieve operation, cause=[%s]"),
         PATH_EMPTY("The path and name of the file to retrieve from the remote FTP server was null (DynamicValue=[%s])."),
         TYPE_NOT_SUPPORTED("The component only support payload input with String type, however type=[%s] was found.");
