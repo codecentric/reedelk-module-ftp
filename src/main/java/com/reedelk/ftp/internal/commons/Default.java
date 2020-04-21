@@ -4,6 +4,9 @@ import com.reedelk.ftp.component.ConnectionMode;
 
 public class Default {
 
+    private Default() {
+    }
+
     public static final ConnectionMode FTP_DEFAULT_MODE = ConnectionMode.PASSIVE;
     public static final int FTP_PORT = 21;
     public static final boolean RECURSIVE = false;
