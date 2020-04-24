@@ -13,8 +13,8 @@ import java.util.Optional;
 import static com.reedelk.ftp.component.ConnectionType.FTP;
 import static com.reedelk.ftp.internal.commons.Default.FTP_DEFAULT_MODE;
 import static com.reedelk.ftp.internal.commons.Default.FTP_PORT;
-import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotBlank;
-import static com.reedelk.runtime.api.commons.ConfigurationPreconditions.requireNotNull;
+import static com.reedelk.runtime.api.commons.ComponentPrecondition.Configuration.requireNotBlank;
+import static com.reedelk.runtime.api.commons.ComponentPrecondition.Configuration.requireNotNull;
 import static java.util.Optional.ofNullable;
 
 public class FTPClientProvider {
