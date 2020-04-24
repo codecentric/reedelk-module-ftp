@@ -102,11 +102,12 @@ public class FTPRetrieve implements ProcessorSync {
 
             if (success)  {
 
-                MimeType mimeType = MimeTypeUtils.mimeTypeFrom(autoMimeType, this.mimeType, remotePath, MimeType.APPLICATION_BINARY);
+                MimeType finalMimeType =
+                        MimeTypeUtils.fromFileExtensionOrParse(autoMimeType, mimeType, remotePath, MimeType.APPLICATION_BINARY);
 
                 byte[] data = outputStream.toByteArray();
                 return MessageBuilder.get(FTPRetrieve.class)
-                        .withBinary(data, mimeType)
+                        .withBinary(data, finalMimeType)
                         .build();
             }
             String error = ERROR_NOT_SUCCESS.format(remotePath);
