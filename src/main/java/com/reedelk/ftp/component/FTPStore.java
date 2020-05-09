@@ -34,6 +34,7 @@ import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 @Component(service = FTPStore.class, scope = ServiceScope.PROTOTYPE)
 public class FTPStore implements ProcessorSync {
 
+    @DialogTitle("FTP Configuration")
     @Property("Connection")
     @Description("FTP connection configuration to be used to execute the store operation.")
     private ConnectionConfiguration connection;

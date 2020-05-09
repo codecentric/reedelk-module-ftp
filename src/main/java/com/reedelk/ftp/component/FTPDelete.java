@@ -31,6 +31,7 @@ import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 @Component(service = FTPDelete.class, scope = ServiceScope.PROTOTYPE)
 public class FTPDelete implements ProcessorSync {
 
+    @DialogTitle("FTP Configuration")
     @Property("Connection")
     @Description("FTP connection configuration to be used to execute the delete operation.")
     private ConnectionConfiguration connection;

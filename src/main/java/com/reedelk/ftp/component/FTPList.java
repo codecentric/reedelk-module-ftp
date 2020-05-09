@@ -32,6 +32,7 @@ import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 @Component(service = FTPList.class, scope = ServiceScope.PROTOTYPE)
 public class FTPList implements ProcessorSync {
 
+    @DialogTitle("FTP Configuration")
     @Property("Connection")
     @Description("FTP connection configuration to be used to list files from.")
     private ConnectionConfiguration connection;
