@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 
 import static com.reedelk.ftp.internal.type.FTPFile.*;
 
-@Type(mapKeyType = String.class, mapValueType = Serializable.class)
+@Type(displayName = "FTPFile", mapKeyType = String.class, mapValueType = Serializable.class)
 @TypeProperty(name = SIZE, type = long.class)
 @TypeProperty(name = TYPE, type = int.class)
 @TypeProperty(name = NAME, type = String.class)
