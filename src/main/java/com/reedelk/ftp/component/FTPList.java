@@ -3,8 +3,11 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandList;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.attribute.FTPAttribute;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPListException;
+import com.reedelk.ftp.internal.type.FTPFile;
+import com.reedelk.ftp.internal.type.ListOfFTPFile;
 import com.reedelk.runtime.api.annotation.*;
 import com.reedelk.runtime.api.component.ProcessorSync;
 import com.reedelk.runtime.api.converter.ConverterService;
@@ -19,13 +22,19 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.ERROR_GENERIC;
 import static com.reedelk.ftp.internal.commons.Messages.FTPList.PATH_EMPTY;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP List Files")
+@ComponentOutput(
+        attributes = FTPAttribute.class,
+        payload = ListOfFTPFile.class,
+        description = "The list of files on the FTP server from the given path.")
+@ComponentInput(
+        payload = Object.class,
+        description = "The input payload is used to evaluate the path expression to determine the path to list files from on the remote FTP server.")
 @Description("The FTP List Files component allows to list all the files from a remote FTP server directory. " +
         "If the property recursive is true, the listing of the files is recursive starting from the configured" +
         "working directory in the Connection configuration. The component allows to also only list files or directories.")
@@ -86,7 +95,6 @@ public class FTPList implements ProcessorSync {
         }
     }
 
-    @SuppressWarnings({"rawtypes"})
     @Override
     public Message apply(FlowContext flowContext, Message message) {
 
@@ -105,10 +113,13 @@ public class FTPList implements ProcessorSync {
         CommandList commandList =
                 new CommandList(remotePath, recursive, filesOnly, directoriesOnly);
 
-        List<Map> files = provider.execute(commandList, exceptionMapper);
+        List<FTPFile> files = provider.execute(commandList, exceptionMapper);
+
+        FTPAttribute attribute = new FTPAttribute(remotePath);
 
         return MessageBuilder.get(FTPList.class)
-                .withList(files, Map.class)
+                .withList(files, FTPFile.class)
+                .attributes(attribute)
                 .build();
     }
 

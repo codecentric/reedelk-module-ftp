@@ -3,6 +3,7 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandStore;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.attribute.FTPAttribute;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPStoreException;
 import com.reedelk.runtime.api.annotation.*;
@@ -26,6 +27,13 @@ import static com.reedelk.ftp.internal.commons.Messages.FTPStore.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Store")
+@ComponentOutput(
+        attributes = FTPAttribute.class,
+        payload = boolean.class,
+        description = "True if the file was successfully stored on the remote FTP server, false otherwise.")
+@ComponentInput(
+        payload = Object.class,
+        description = "The data to be stored on the remote FTP server.")
 @Description("The FTP Store component allows to store a file to a remote FTP server. " +
         "The path of the file to store might be a static or dynamic value. " +
         "The path of the file is mandatory and if not present an error will be thrown by the component." +
@@ -113,14 +121,20 @@ public class FTPStore implements ProcessorSync {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
 
             CommandStore command = new CommandStore(remotePath, inputStream);
+
             boolean success = provider.execute(command, exceptionMapper);
+
+            FTPAttribute attribute = new FTPAttribute(remotePath);
+
             if (success) {
                 return MessageBuilder.get(FTPStore.class)
-                        .withJavaObject(true)
+                        .withJavaObject(success)
+                        .attributes(attribute)
                         .build();
             } else {
                 return MessageBuilder.get(FTPStore.class)
-                        .withJavaObject(false)
+                        .withJavaObject(success)
+                        .attributes(attribute)
                         .build();
             }
         } catch (IOException exception) {

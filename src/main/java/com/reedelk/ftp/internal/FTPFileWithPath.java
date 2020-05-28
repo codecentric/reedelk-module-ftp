@@ -4,8 +4,8 @@ import org.apache.commons.net.ftp.FTPFile;
 
 public class FTPFileWithPath {
 
-    final String path;
-    final FTPFile file;
+    public final String path;
+    public final FTPFile file;
 
     private FTPFileWithPath(String path, FTPFile file) {
         this.path = path;

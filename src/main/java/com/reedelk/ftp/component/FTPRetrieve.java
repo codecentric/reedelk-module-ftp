@@ -3,6 +3,7 @@ package com.reedelk.ftp.component;
 import com.reedelk.ftp.internal.CommandRetrieve;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.attribute.FTPAttribute;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPRetrieveException;
 import com.reedelk.runtime.api.annotation.*;
@@ -28,6 +29,13 @@ import static com.reedelk.ftp.internal.commons.Messages.FTPRetrieve.*;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Retrieve")
+@ComponentOutput(
+        attributes = FTPAttribute.class,
+        payload = byte[].class,
+        description = "A byte array containing the file data retrieved from the remote FTP server.")
+@ComponentInput(
+        payload = Object.class,
+        description = "The input payload is used to evaluate the path expression to determine the path of the file to retrieve from the remote FTP server.")
 @Description("The FTP Retrieve component allows to download a file from a remote FTP server. " +
         "The path of the file to download might be a static or dynamic value. If the path is not given, " +
         "the name of the file to download is taken from the message payload. " +
@@ -107,8 +115,12 @@ public class FTPRetrieve implements ProcessorSync {
                         MimeTypeUtils.fromFileExtensionOrParse(autoMimeType, mimeType, remotePath, MimeType.APPLICATION_BINARY);
 
                 byte[] data = outputStream.toByteArray();
+
+                FTPAttribute attribute = new FTPAttribute(remotePath);
+
                 return MessageBuilder.get(FTPRetrieve.class)
                         .withBinary(data, finalMimeType)
+                        .attributes(attribute)
                         .build();
             }
             String error = ERROR_NOT_SUCCESS.format(remotePath);

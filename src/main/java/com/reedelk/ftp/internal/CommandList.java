@@ -13,14 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.reedelk.ftp.internal.type.FTPFile.*;
 import static com.reedelk.runtime.api.commons.StringUtils.EMPTY;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
-@SuppressWarnings("rawtypes")
-public class CommandList implements Command<List<Map>> {
-
-    private static final FTPFileMapper mapper = new FTPFileMapper();
+public class CommandList implements Command<List<com.reedelk.ftp.internal.type.FTPFile>> {
 
     private final String path;
     private final boolean recursive;
@@ -34,27 +32,26 @@ public class CommandList implements Command<List<Map>> {
         this.directoriesOnly = Optional.ofNullable(directoriesOnly).orElse(Default.DIRECTORIES_ONLY);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public List<Map> execute(FTPClient client) throws IOException {
+    public List<com.reedelk.ftp.internal.type.FTPFile> execute(FTPClient client) throws IOException {
         return recursive ?
                 listRecursively(client) :
                 list(client);
     }
 
-    private List<Map> list(FTPClient client) throws IOException {
+    private List<com.reedelk.ftp.internal.type.FTPFile> list(FTPClient client) throws IOException {
         FTPFile[] files = client.listFiles(path);
         return stream(files)
                 .map(file -> FTPFileWithPath.from(path, file))
-                .map(mapper)
+                .map(com.reedelk.ftp.internal.type.FTPFile::new)
                 .filter(predicates().stream().reduce(x->true, Predicate::and))
                 .collect(toList());
     }
 
-    private List<Map> listRecursively(FTPClient client) throws IOException {
+    private List<com.reedelk.ftp.internal.type.FTPFile> listRecursively(FTPClient client) throws IOException {
         return listRecursively(client, path, EMPTY)
                 .stream()
-                .map(mapper)
+                .map(com.reedelk.ftp.internal.type.FTPFile::new)
                 .filter(predicates().stream().reduce(x->true, Predicate::and))
                 .collect(toList());
     }
@@ -97,10 +94,10 @@ public class CommandList implements Command<List<Map>> {
 
     private List<Predicate<Map<String, Serializable>>> predicates() {
         List<Predicate<Map<String, Serializable>>> allPredicates = new ArrayList<>();
-        if (filesOnly) allPredicates.add(FTPFileMapper.FILES_ONLY);
-        if (directoriesOnly) allPredicates.add(FTPFileMapper.DIRECTORIES_ONLY);
-        allPredicates.add(FTPFileMapper.CURRENT_DIRECTORY);
-        allPredicates.add(FTPFileMapper.PARENT_DIRECTORY);
+        if (filesOnly) allPredicates.add(FILES_ONLY);
+        if (directoriesOnly) allPredicates.add(DIRECTORIES_ONLY);
+        allPredicates.add(CURRENT_DIRECTORY);
+        allPredicates.add(PARENT_DIRECTORY);
         return allPredicates;
     }
 }

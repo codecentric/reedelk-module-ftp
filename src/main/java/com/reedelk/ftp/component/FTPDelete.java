@@ -4,6 +4,7 @@ import com.reedelk.ftp.internal.Command;
 import com.reedelk.ftp.internal.CommandDeleteFile;
 import com.reedelk.ftp.internal.ExceptionMapper;
 import com.reedelk.ftp.internal.FTPClientProvider;
+import com.reedelk.ftp.internal.attribute.FTPAttribute;
 import com.reedelk.ftp.internal.commons.Utils;
 import com.reedelk.ftp.internal.exception.FTPDeleteException;
 import com.reedelk.runtime.api.annotation.*;
@@ -24,6 +25,13 @@ import static com.reedelk.ftp.internal.commons.Utils.joinPath;
 import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
 
 @ModuleComponent("FTP Delete")
+@ComponentOutput(
+        attributes = FTPAttribute.class,
+        payload = boolean.class,
+        description = "True if the delete was successful, false otherwise.")
+@ComponentInput(
+        payload = Object.class,
+        description = "The input payload is used to evaluate the path expression to determine the path to delete on the remote FTP server.")
 @Description("The FTP Delete component allows to delete a file from a remote FTP server. " +
         "The path of the file to be deleted might be a static or dynamic value. If the path is not given, " +
         "the name of the file to be deleted is taken from the message payload. " +
@@ -80,8 +88,11 @@ public class FTPDelete implements ProcessorSync {
 
         boolean success = provider.execute(command, exceptionMapper);
 
+        FTPAttribute attribute = new FTPAttribute(remotePath);
+
         return MessageBuilder.get(FTPDelete.class)
                 .withJavaObject(success)
+                .attributes(attribute)
                 .build();
     }
 
