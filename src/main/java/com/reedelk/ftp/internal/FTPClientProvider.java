@@ -19,6 +19,8 @@ import static java.util.Optional.ofNullable;
 
 public class FTPClientProvider {
 
+    private static final int DEFAULT_TIMEOUT_MILLIS = 5000;
+
     private final int port;
     private final String host;
     private final String username;
@@ -76,6 +78,8 @@ public class FTPClientProvider {
     }
 
     private void open(ExceptionMapper exceptionMapper) throws IOException {
+        ftp.setDefaultTimeout(DEFAULT_TIMEOUT_MILLIS);
+        ftp.setDataTimeout(DEFAULT_TIMEOUT_MILLIS);
         ftp.connect(host, port);
         int reply = ftp.getReplyCode();
         if (!FTPReply.isPositiveCompletion(reply)) {
@@ -90,6 +94,12 @@ public class FTPClientProvider {
     }
 
     public void dispose() {
-        close();
+        if (ftp != null) {
+            try {
+                ftp.disconnect();
+            } catch (Exception e) {
+                // Ignored
+            }
+        }
     }
 }
