@@ -32,8 +32,8 @@ import static com.reedelk.runtime.api.commons.DynamicValueUtils.isNullOrBlank;
         payload = boolean.class,
         description = "True if the file was successfully stored on the remote FTP server, false otherwise.")
 @ComponentInput(
-        payload = Object.class,
-        description = "The data to be stored on the remote FTP server.")
+        payload = { byte[].class, String.class },
+        description = "The data to be stored on the remote FTP server. The expected input is byte array or string.")
 @Description("The FTP Store component allows to store a file to a remote FTP server. " +
         "The path of the file to store might be a static or dynamic value. " +
         "The path of the file is mandatory and if not present an error will be thrown by the component." +
