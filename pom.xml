@@ -22,7 +22,7 @@
         <jacoco.version>0.8.2</jacoco.version>
         <jsonassert.version>1.5.0</jsonassert.version>
         <mockito.version>2.23.0</mockito.version>
-        <assertj.version>3.11.1</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
         <junit.version>5.5.2</junit.version>
     </properties>
     <pluginRepositories>
